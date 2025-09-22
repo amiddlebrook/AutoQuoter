@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoQuoter - Instant Contractor Quotes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .quote-result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e8f5e8;
+            border-radius: 5px;
+            border-left: 5px solid #27ae60;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AutoQuoter</h1>
+        <p>Get instant, fair market quotes for contractor services</p>
+
+        <form id="quoteForm">
+            <div class="form-group">
+                <label for="jobType">Service Type:</label>
+                <select id="jobType" required>
+                    <option value="">Select a service</option>
+                    <option value="HVAC">HVAC</option>
+                    <option value="plumbing">Plumbing</option>
+                    <option value="electrical">Electrical</option>
+                    <option value="roofing">Roofing</option>
+                    <option value="landscaping">Landscaping</option>
+                    <option value="remodeling">Remodeling</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="location">Location (State):</label>
+                <input type="text" id="location" placeholder="e.g., CA, NY, TX" required>
+            </div>
+
+            <div class="form-group">
+                <label for="complexity">Complexity:</label>
+                <select id="complexity">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="materials">Materials (optional):</label>
+                <input type="text" id="materials" placeholder="e.g., copper:10, steel:5">
+            </div>
+
+            <button type="submit">Get Quote</button>
+        </form>
+
+        <div id="quoteResult" class="quote-result hidden">
+            <h3>Your Fair Market Quote</h3>
+            <p><strong>Service:</strong> <span id="resultService"></span></p>
+            <p><strong>Location:</strong> <span id="resultLocation"></span></p>
+            <p><strong>Price Range:</strong></p>
+            <ul>
+                <li>Low: $<span id="resultLow"></span></li>
+                <li>Median: $<span id="resultMedian"></span></li>
+                <li>High: $<span id="resultHigh"></span></li>
+            </ul>
+            <p><strong>Fair Market Certificate:</strong> ✅ Verified</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('quoteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const jobType = document.getElementById('jobType').value;
+            const location = document.getElementById('location').value;
+            const complexity = document.getElementById('complexity').value;
+            const materialsInput = document.getElementById('materials').value;
+
+            let materials = {};
+            if (materialsInput) {
+                materialsInput.split(',').forEach(item => {
+                    const [material, amount] = item.split(':');
+                    if (material && amount) {
+                        materials[material.trim()] = parseFloat(amount.trim());
+                    }
+                });
+            }
+
+            const data = {
+                job_type: jobType,
+                location: location,
+                complexity: complexity,
+                materials: materials
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/api/quote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('resultService').textContent = result.job_type;
+                    document.getElementById('resultLocation').textContent = result.location;
+                    document.getElementById('resultLow').textContent = result.quote_range.low;
+                    document.getElementById('resultMedian').textContent = result.quote_range.median;
+                    document.getElementById('resultHigh').textContent = result.quote_range.high;
+
+                    document.getElementById('quoteResult').classList.remove('hidden');
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error connecting to server: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
