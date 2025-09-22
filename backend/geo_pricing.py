@@ -1,9 +1,11 @@
 import json
 import os
+from pricing_model import MLPricingModel
 
 class GeoPricingEngine:
     def __init__(self, data_file='pricing_data.json'):
         self.data_file = data_file
+        self.ml_model = MLPricingModel()
         self.load_data()
 
     def load_data(self):
@@ -53,15 +55,21 @@ class GeoPricingEngine:
 
         total_cost = base_cost + material_cost
 
-        # Calculate range
-        low = total_cost * 0.8
-        median = total_cost
-        high = total_cost * 1.2
+        # Use ML model for enhanced prediction
+        complexity_factor = 1 if complexity == "medium" else (1.5 if complexity == "high" else 0.8)
+        location_factor = wage_index
+        ml_prediction = self.ml_model.predict_price(complexity_factor, location_factor, material_cost)
+
+        # Combine traditional calculation with ML prediction
+        final_low = (total_cost * 0.8 + ml_prediction["low"]) / 2
+        final_median = (total_cost + ml_prediction["median"]) / 2
+        final_high = (total_cost * 1.2 + ml_prediction["high"]) / 2
 
         return {
-            "low": round(low, 2),
-            "median": round(median, 2),
-            "high": round(high, 2)
+            "low": round(final_low, 2),
+            "median": round(final_median, 2),
+            "high": round(final_high, 2),
+            "ml_enhanced": True
         }
 
     def save_data(self):
