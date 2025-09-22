@@ -54,5 +54,25 @@ def get_recent_activity():
         }
     ])
 
+@app.route('/api/market-trends')
+def get_market_trends():
+    # Mock market trend data
+    return jsonify({
+        "regional_demand": {
+            "CA": {"HVAC": 85, "plumbing": 72, "electrical": 78},
+            "NY": {"HVAC": 92, "plumbing": 88, "electrical": 76},
+            "TX": {"HVAC": 68, "plumbing": 65, "electrical": 71}
+        },
+        "price_trends": {
+            "HVAC": [1800, 1850, 1900, 1950, 2000, 2050],
+            "plumbing": [120, 125, 130, 135, 140, 145],
+            "electrical": [300, 310, 320, 330, 340, 350]
+        },
+        "competitor_analysis": {
+            "average_quotes": {"HVAC": 2200, "plumbing": 180, "electrical": 400},
+            "market_share": {"AutoQuoter": 45, "Competitor A": 30, "Competitor B": 25}
+        }
+    })
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -12,7 +12,7 @@ AutoQuoter delivers transparency to homeowners and provides contractors with fas
 - Instant quotes with low/median/high ranges
 - Contractor dashboard with proposals and analytics
 - Consumer 'Fair Market Certificate'
-- Market trend dashboards for regional intelligence
+- Market trend dashboards for regional intelligence and competitive analysis
 
 ## Technical Architecture
 
@@ -25,7 +25,7 @@ AutoQuoter delivers transparency to homeowners and provides contractors with fas
 ## Project Structure
 
 - `backend/`: API and business logic
-- `frontend/`: User interfaces
+- `frontend/`: User interfaces (consumer, contractor dashboard, market trends)
 - `database/`: Database schemas and migrations
 - `ml_components/`: Machine learning models
 - `docs/`: Documentation and PRD
