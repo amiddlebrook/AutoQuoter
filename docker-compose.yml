@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  autoquoter-backend:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - FLASK_DEBUG=False
+    volumes:
+      - ./backend:/app
+    networks:
+      - autoquoter-network
+
+  # Add database service when needed
+  # postgres:
+  #   image: postgres:13
+  #   environment:
+  #     POSTGRES_DB: autoquoter
+  #     POSTGRES_USER: autoquoter
+  #     POSTGRES_PASSWORD: password
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - autoquoter-network
+
+networks:
+  autoquoter-network:
+    driver: bridge
+
+# volumes:
+#   postgres_data:
