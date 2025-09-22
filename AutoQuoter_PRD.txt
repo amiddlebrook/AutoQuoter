@@ -1,0 +1,36 @@
+AutoQuoter – Refined PRD
+ 
+Product Overview
+AutoQuoter is a SaaS platform that generates instant, geo-specific market-rate quotes for contractor
+services (HVAC, plumbing, electrical, roofing, landscaping, remodeling). It delivers transparency to
+homeowners and provides contractors with faster quoting tools and pre-qualified leads.
+Target Users
+Homeowners: want transparent, fair pricing.
+Contractors: need efficient quoting and higher lead conversion.
+Small Trade Businesses: seek competitive local market intelligence.
+Problems Solved
+Homeowners avoid overpaying and chasing multiple bids.
+Contractors save hours on quoting and improve close rates.
+Industry gains a neutral, trusted pricing benchmark.
+Core Features
+Geo-pricing engine with local labor/material data.
+Instant quotes with low/median/high ranges.
+Contractor dashboard with proposals and analytics.
+Consumer 'Fair Market Certificate.'
+Market trend dashboards for regional intelligence.
+Competitive Landscape
+Existing estimating software helps contractors but not homeowners (e.g., Jobber, ServiceTitan).
+Marketplaces like Angi/HomeAdvisor act as biased lead brokers.
+AutoQuoter is neutral and data-driven, trusted by both sides.
+Technical Specifications
+Cloud-native, modular microservices architecture.
+Data ingestion: contractor inputs, wage indexes, material APIs.
+Machine learning for pricing accuracy.
+Integrations: QuickBooks, Jobber, CRMs.
+Security: SSL/TLS, GDPR/CCPA compliance.
+Scalable with Kubernetes/Docker.
+Prompt Instruction (for AI Builder)
+Given job type {X}, location {Y}, and inputs {materials, sqft, complexity}, generate a fair market quote
+range (low, median, high) using wage index {region}, material costs {region}, and contractor historical
+data.
+This ensures consistent and explainable pricing results across trades and regions.
