@@ -141,3 +141,59 @@ def oauth_callback(service):
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+def train_ml_models():
+    """Train advanced ML models"""
+    from advanced_pricing import AdvancedMLPricingModel
+
+    try:
+        ml_model = AdvancedMLPricingModel()
+        results, best_model = ml_model.train_models()
+
+        return jsonify({
+            'status': 'success',
+            'message': 'ML models trained successfully',
+            'best_model': best_model,
+            'results': results
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ml/predict', methods=['POST'])
+def ml_predict():
+    """Advanced ML prediction"""
+    data = request.json
+    job_type = data.get('job_type')
+    location = data.get('location')
+    complexity = data.get('complexity', 'medium')
+    materials = data.get('materials', {})
+    square_feet = data.get('square_feet', 1000)
+
+    try:
+        quote_range = pricing_engine.calculate_quote(
+            job_type, location, complexity, materials, square_feet, use_advanced_ml=True
+        )
+
+        return jsonify({
+            'job_type': job_type,
+            'location': location,
+            'quote_range': quote_range,
+            'fair_market_certificate': True
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ml/models', methods=['GET'])
+def get_ml_models():
+    """Get available ML models and their performance"""
+    from advanced_pricing import AdvancedMLPricingModel
+
+    try:
+        ml_model = AdvancedMLPricingModel()
+        performance = ml_model.get_model_performance()
+
+        return jsonify({
+            'status': 'success',
+            'models': performance
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500

@@ -1,11 +1,13 @@
 import json
 import os
 from pricing_model import MLPricingModel
+from advanced_pricing import AdvancedMLPricingModel
 
 class GeoPricingEngine:
     def __init__(self, data_file='pricing_data.json'):
         self.data_file = data_file
         self.ml_model = MLPricingModel()
+        self.advanced_ml_model = AdvancedMLPricingModel()
         self.load_data()
 
     def load_data(self):
@@ -33,7 +35,7 @@ class GeoPricingEngine:
             }
         }
 
-    def calculate_quote(self, job_type, location, complexity="medium", materials=None):
+    def calculate_quote(self, job_type, location, complexity="medium", materials=None, square_feet=1000, use_advanced_ml=True):
         if location not in self.pricing_data["wage_indexes"]:
             location = "default"
 
@@ -55,7 +57,33 @@ class GeoPricingEngine:
 
         total_cost = base_cost + material_cost
 
-        # Use ML model for enhanced prediction
+        if use_advanced_ml:
+            # Use advanced ML model for enhanced prediction
+            features = {
+                'square_feet': square_feet,
+                'materials_cost': material_cost,
+                'labor_hours': base_cost / labor_rate,
+                'location_multiplier': wage_index,
+                'complexity_multiplier': 1 if complexity == "medium" else (1.5 if complexity == "high" else 0.8),
+                'season_multiplier': 1.0,  # Default
+                'urgency_multiplier': 1.0,  # Default
+                'year_trend': 0.1  # Default
+            }
+
+            try:
+                advanced_prediction = self.advanced_ml_model.predict_price(features)
+                return {
+                    "low": advanced_prediction['low_estimate'],
+                    "median": advanced_prediction['predicted_price'],
+                    "high": advanced_prediction['high_estimate'],
+                    "ml_enhanced": True,
+                    "confidence_score": advanced_prediction['confidence_score'],
+                    "model_used": advanced_prediction['model_used']
+                }
+            except Exception as e:
+                print(f"Advanced ML prediction failed: {e}, falling back to basic model")
+
+        # Fallback to basic ML model
         complexity_factor = 1 if complexity == "medium" else (1.5 if complexity == "high" else 0.8)
         location_factor = wage_index
         ml_prediction = self.ml_model.predict_price(complexity_factor, location_factor, material_cost)
