@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Analytics Dashboard - AutoQuoter</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .filter-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .filter-group input, .filter-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-card h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-card h4 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .metric-card p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+
+        .insights-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .insights-list li {
+            background: #f8f9fa;
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .recommendations-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations-list li {
+            background: #fff3cd;
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 6px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            border-left: 4px solid #dc3545;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            border-left: 4px solid #28a745;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Advanced Analytics Dashboard</h1>
+        <p>Business Intelligence & Performance Insights</p>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h3>Filters & Controls</h3>
+
+            <div class="filter-group">
+                <label for="dateRange">Date Range:</label>
+                <select id="dateRange">
+                    <option value="7">Last 7 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="all">All time</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="reportType">Report Type:</label>
+                <select id="reportType">
+                    <option value="overview">Overview</option>
+                    <option value="quotes">Quote Analytics</option>
+                    <option value="users">User Behavior</option>
+                    <option value="performance">Performance</option>
+                    <option value="geographic">Geographic</option>
+                    <option value="trends">Trends</option>
+                </select>
+            </div>
+
+            <button class="btn" onclick="generateReport()">Generate Report</button>
+            <button class="btn btn-secondary" onclick="exportData()">Export Data</button>
+        </div>
+
+        <div class="main-content">
+            <!-- Key Metrics -->
+            <div class="dashboard-card">
+                <h3>📊 Key Metrics</h3>
+                <div class="metric-grid" id="keyMetrics">
+                    <div class="metric-card">
+                        <h4 id="totalQuotes">--</h4>
+                        <p>Total Quotes</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4 id="avgQuoteValue">--</h4>
+                        <p>Avg Quote Value</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4 id="conversionRate">--</h4>
+                        <p>Conversion Rate</p>
+                    </div>
+                    <div class="metric-card">
+                        <h4 id="avgResponseTime">--</h4>
+                        <p>Avg Response Time</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quote Analytics -->
+            <div class="dashboard-card" id="quoteAnalyticsCard" style="display: none;">
+                <h3>💰 Quote Analytics</h3>
+                <div class="chart-container">
+                    <canvas id="quoteTrendsChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="jobTypeDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- User Behavior -->
+            <div class="dashboard-card" id="userBehaviorCard" style="display: none;">
+                <h3>👥 User Behavior</h3>
+                <div class="chart-container">
+                    <canvas id="userTypeChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="conversionFunnelChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="dashboard-card" id="performanceCard" style="display: none;">
+                <h3>⚡ Performance Metrics</h3>
+                <div class="chart-container">
+                    <canvas id="apiPerformanceChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="errorRateChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Geographic Insights -->
+            <div class="dashboard-card" id="geographicCard" style="display: none;">
+                <h3>🌍 Geographic Insights</h3>
+                <div class="chart-container">
+                    <canvas id="geographicChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="marketSizeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Key Insights -->
+            <div class="dashboard-card">
+                <h3>💡 Key Insights</h3>
+                <ul class="insights-list" id="insightsList">
+                    <li class="loading">Loading insights...</li>
+                </ul>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="dashboard-card">
+                <h3>🎯 Recommendations</h3>
+                <ul class="recommendations-list" id="recommendationsList">
+                    <li class="loading">Loading recommendations...</li>
+                </ul>
+            </div>
+
+            <!-- Status Messages -->
+            <div id="statusMessages"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentReportData = null;
+        let charts = {};
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            generateReport();
+        });
+
+        async function generateReport() {
+            const dateRange = document.getElementById('dateRange').value;
+            const reportType = document.getElementById('reportType').value;
+
+            showLoadingState();
+
+            try {
+                const startDate = getStartDate(dateRange);
+                const endDate = new Date().toISOString();
+
+                const response = await fetch('http://localhost:5000/api/analytics/report', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        start_date: startDate,
+                        end_date: endDate,
+                        report_type: reportType
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                currentReportData = data;
+
+                updateDashboard(data, reportType);
+                showSuccessMessage('Report generated successfully');
+
+            } catch (error) {
+                console.error('Error generating report:', error);
+                showErrorMessage('Failed to generate report: ' + error.message);
+            }
+        }
+
+        function getStartDate(days) {
+            if (days === 'all') return null;
+
+            const date = new Date();
+            date.setDate(date.getDate() - parseInt(days));
+            return date.toISOString();
+        }
+
+        function updateDashboard(data, reportType) {
+            // Update key metrics
+            updateKeyMetrics(data);
+
+            // Update insights and recommendations
+            updateInsights(data.key_insights || []);
+            updateRecommendations(data.recommendations || []);
+
+            // Show/hide cards based on report type
+            showRelevantCards(reportType);
+
+            // Update charts based on data
+            updateCharts(data, reportType);
+        }
+
+        function updateKeyMetrics(data) {
+            const quotes = data.quote_analytics || {};
+            const users = data.user_behavior || {};
+            const perf = data.performance_metrics || {};
+
+            document.getElementById('totalQuotes').textContent = quotes.total_quotes || 0;
+            document.getElementById('avgQuoteValue').textContent = `$${(quotes.average_quote_value || 0).toFixed(0)}`;
+            document.getElementById('conversionRate').textContent = `${(users.conversion_rate || 0).toFixed(1)}%`;
+            document.getElementById('avgResponseTime').textContent = `${(perf.average_response_time || 0).toFixed(3)}s`;
+        }
+
+        function updateInsights(insights) {
+            const list = document.getElementById('insightsList');
+            list.innerHTML = '';
+
+            if (insights.length === 0) {
+                list.innerHTML = '<li>No insights available</li>';
+                return;
+            }
+
+            insights.forEach(insight => {
+                const li = document.createElement('li');
+                li.textContent = insight;
+                list.appendChild(li);
+            });
+        }
+
+        function updateRecommendations(recommendations) {
+            const list = document.getElementById('recommendationsList');
+            list.innerHTML = '';
+
+            if (recommendations.length === 0) {
+                list.innerHTML = '<li>No recommendations available</li>';
+                return;
+            }
+
+            recommendations.forEach(rec => {
+                const li = document.createElement('li');
+                li.textContent = rec;
+                list.appendChild(li);
+            });
+        }
+
+        function showRelevantCards(reportType) {
+            // Hide all cards first
+            const cards = ['quoteAnalyticsCard', 'userBehaviorCard', 'performanceCard', 'geographicCard'];
+            cards.forEach(cardId => {
+                document.getElementById(cardId).style.display = 'none';
+            });
+
+            // Show relevant cards
+            switch(reportType) {
+                case 'quotes':
+                    document.getElementById('quoteAnalyticsCard').style.display = 'block';
+                    break;
+                case 'users':
+                    document.getElementById('userBehaviorCard').style.display = 'block';
+                    break;
+                case 'performance':
+                    document.getElementById('performanceCard').style.display = 'block';
+                    break;
+                case 'geographic':
+                    document.getElementById('geographicCard').style.display = 'block';
+                    break;
+                case 'overview':
+                case 'trends':
+                    // Show all cards for overview
+                    cards.forEach(cardId => {
+                        document.getElementById(cardId).style.display = 'block';
+                    });
+                    break;
+            }
+        }
+
+        function updateCharts(data, reportType) {
+            // Destroy existing charts
+            Object.values(charts).forEach(chart => chart.destroy());
+            charts = {};
+
+            // Update charts based on report type
+            if (reportType === 'quotes' || reportType === 'overview') {
+                updateQuoteCharts(data);
+            }
+
+            if (reportType === 'users' || reportType === 'overview') {
+                updateUserCharts(data);
+            }
+
+            if (reportType === 'performance' || reportType === 'overview') {
+                updatePerformanceCharts(data);
+            }
+
+            if (reportType === 'geographic' || reportType === 'overview') {
+                updateGeographicCharts(data);
+            }
+        }
+
+        function updateQuoteCharts(data) {
+            const quotes = data.quote_analytics || {};
+
+            // Quote trends chart
+            const trendsCtx = document.getElementById('quoteTrendsChart').getContext('2d');
+            const trendsData = data.time_series_trends?.quotes || {};
+
+            if (trendsData.dates && trendsData.values) {
+                charts.quoteTrends = new Chart(trendsCtx, {
+                    type: 'line',
+                    data: {
+                        labels: trendsData.dates,
+                        datasets: [{
+                            label: 'Average Quote Value',
+                            data: trendsData.values,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Job type distribution chart
+            const jobTypeCtx = document.getElementById('jobTypeDistributionChart').getContext('2d');
+            if (quotes.job_type_distribution) {
+                charts.jobTypeDist = new Chart(jobTypeCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(quotes.job_type_distribution),
+                        datasets: [{
+                            data: Object.values(quotes.job_type_distribution),
+                            backgroundColor: [
+                                '#667eea', '#764ba2', '#f093fb', '#f5576c',
+                                '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+        }
+
+        function updateUserCharts(data) {
+            const users = data.user_behavior || {};
+
+            // User type distribution
+            const userTypeCtx = document.getElementById('userTypeChart').getContext('2d');
+            if (users.user_type_distribution) {
+                charts.userType = new Chart(userTypeCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(users.user_type_distribution),
+                        datasets: [{
+                            data: Object.values(users.user_type_distribution),
+                            backgroundColor: ['#667eea', '#764ba2', '#f093fb']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // Conversion funnel
+            const funnelCtx = document.getElementById('conversionFunnelChart').getContext('2d');
+            if (users.conversion_statuses) {
+                charts.conversionFunnel = new Chart(funnelCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(users.conversion_statuses),
+                        datasets: [{
+                            label: 'Users',
+                            data: Object.values(users.conversion_statuses),
+                            backgroundColor: '#667eea'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updatePerformanceCharts(data) {
+            const perf = data.performance_metrics || {};
+
+            // API performance
+            const apiCtx = document.getElementById('apiPerformanceChart').getContext('2d');
+            if (perf.endpoint_metrics) {
+                const endpoints = Object.keys(perf.endpoint_metrics);
+                const responseTimes = endpoints.map(ep => perf.endpoint_metrics[ep].avg_response_time);
+
+                charts.apiPerformance = new Chart(apiCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: endpoints,
+                        datasets: [{
+                            label: 'Avg Response Time (s)',
+                            data: responseTimes,
+                            backgroundColor: '#667eea'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Error rates
+            const errorCtx = document.getElementById('errorRateChart').getContext('2d');
+            if (perf.endpoint_metrics) {
+                const endpoints = Object.keys(perf.endpoint_metrics);
+                const errorRates = endpoints.map(ep => perf.endpoint_metrics[ep].error_rate || 0);
+
+                charts.errorRate = new Chart(errorCtx, {
+                    type: 'line',
+                    data: {
+                        labels: endpoints,
+                        datasets: [{
+                            label: 'Error Rate (%)',
+                            data: errorRates,
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateGeographicCharts(data) {
+            const geo = data.geographic_insights || {};
+
+            // Geographic distribution
+            const geoCtx = document.getElementById('geographicChart').getContext('2d');
+            if (geo.market_sizes) {
+                charts.geographic = new Chart(geoCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(geo.market_sizes),
+                        datasets: [{
+                            label: 'Number of Quotes',
+                            data: Object.values(geo.market_sizes),
+                            backgroundColor: '#667eea'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Market size comparison
+            const marketCtx = document.getElementById('marketSizeChart').getContext('2d');
+            if (geo.average_quote_values) {
+                const locations = Object.keys(geo.average_quote_values);
+                const avgValues = Object.values(geo.average_quote_values);
+
+                charts.marketSize = new Chart(marketCtx, {
+                    type: 'line',
+                    data: {
+                        labels: locations,
+                        datasets: [{
+                            label: 'Average Quote Value',
+                            data: avgValues,
+                            borderColor: '#764ba2',
+                            backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value) {
+                                        return '$' + value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        async function exportData() {
+            try {
+                const response = await fetch('http://localhost:5000/api/analytics/export', {
+                    method: 'GET'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Create and download file
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `autoquoter-analytics-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                showSuccessMessage('Data exported successfully');
+
+            } catch (error) {
+                console.error('Error exporting data:', error);
+                showErrorMessage('Failed to export data: ' + error.message);
+            }
+        }
+
+        function showLoadingState() {
+            document.getElementById('insightsList').innerHTML = '<li class="loading">Loading insights...</li>';
+            document.getElementById('recommendationsList').innerHTML = '<li class="loading">Loading recommendations...</li>';
+        }
+
+        function showSuccessMessage(message) {
+            const statusDiv = document.getElementById('statusMessages');
+            statusDiv.innerHTML = `<div class="success">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 3000);
+        }
+
+        function showErrorMessage(message) {
+            const statusDiv = document.getElementById('statusMessages');
+            statusDiv.innerHTML = `<div class="error">${message}</div>`;
+            setTimeout(() => statusDiv.innerHTML = '', 5000);
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(generateReport, 300000);
+    </script>
+</body>
+</html>

@@ -139,8 +139,81 @@ def oauth_callback(service):
     # In production, implement proper OAuth 2.0 flow
     return jsonify({'status': f'OAuth callback for {service}'})
 
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+@app.route('/api/analytics/report', methods=['POST'])
+def get_analytics_report():
+    """Get comprehensive analytics report"""
+    from analytics import AnalyticsService
+
+    try:
+        data = request.json
+        start_date = data.get('start_date')
+        end_date = data.get('end_date')
+        report_type = data.get('report_type', 'overview')
+
+        analytics = AnalyticsService()
+        report = analytics.generate_business_report(start_date, end_date)
+
+        return jsonify(report)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/analytics/export', methods=['GET'])
+def export_analytics():
+    """Export analytics data"""
+    from analytics import AnalyticsService
+
+    try:
+        format_type = request.args.get('format', 'json')
+        analytics = AnalyticsService()
+        data = analytics.export_data(format_type)
+
+        return jsonify({'data': data})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/analytics/track/quote', methods=['POST'])
+def track_quote():
+    """Track quote request for analytics"""
+    from analytics import AnalyticsService
+
+    try:
+        quote_data = request.json
+        analytics = AnalyticsService()
+        analytics.track_quote_request(quote_data)
+
+        return jsonify({'status': 'Quote tracked successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/analytics/track/session', methods=['POST'])
+def track_session():
+    """Track user session for analytics"""
+    from analytics import AnalyticsService
+
+    try:
+        session_data = request.json
+        analytics = AnalyticsService()
+        analytics.track_user_session(session_data)
+
+        return jsonify({'status': 'Session tracked successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/analytics/track/api', methods=['POST'])
+def track_api_call():
+    """Track API call for analytics"""
+    from analytics import AnalyticsService
+
+    try:
+        api_data = request.json
+        analytics = AnalyticsService()
+        analytics.track_api_call(api_data)
+
+        return jsonify({'status': 'API call tracked successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/ml/train', methods=['POST'])
 def train_ml_models():
     """Train advanced ML models"""
     from advanced_pricing import AdvancedMLPricingModel
@@ -197,3 +270,6 @@ def get_ml_models():
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
