@@ -7,6 +7,7 @@ This directory contains the user interfaces for AutoQuoter.
 - `index.html`: Main consumer interface for quote requests
 - `dashboard.html`: Contractor dashboard for managing quotes and leads
 - `market-trends.html`: Market trends dashboard for regional intelligence and competitive analysis
+- `integrations.html`: External integrations management interface
 
 ## How to Run
 
@@ -14,7 +15,8 @@ This directory contains the user interfaces for AutoQuoter.
 2. Open `index.html` in a web browser for consumer interface
 3. Open `dashboard.html` in a web browser for contractor dashboard
 4. Open `market-trends.html` in a web browser for market trends dashboard
-5. All interfaces connect to the backend API at `http://localhost:5000`
+5. Open `integrations.html` in a web browser for external integrations management
+6. All interfaces connect to the backend API at `http://localhost:5000`
 
 ## Features
 
@@ -34,3 +36,9 @@ This directory contains the user interfaces for AutoQuoter.
 - Price trend analysis over time
 - Competitor analysis and market share visualization
 - Real-time market intelligence for contractors
+
+### Integrations Management
+- Connect with QuickBooks, Jobber, Salesforce, HubSpot
+- OAuth integration setup
+- Real-time sync status monitoring
+- Centralized integration management

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrations - AutoQuoter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        .sidebar {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .main-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .integration-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .integration-card:hover {
+            background-color: #f8f9fa;
+        }
+        .integration-card.connected {
+            border-left: 5px solid #27ae60;
+        }
+        .integration-card.disconnected {
+            border-left: 5px solid #e74c3c;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .sync-button {
+            background-color: #27ae60;
+        }
+        .sync-button:hover {
+            background-color: #229954;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>External Integrations</h1>
+        <p>Connect AutoQuoter with your favorite business tools</p>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <h3>Available Integrations</h3>
+            <div class="integration-card" onclick="showIntegration('quickbooks')">
+                <h4>QuickBooks</h4>
+                <p>Sync invoices, customers, and financial data</p>
+                <span class="status-label" id="quickbooks-status">Disconnected</span>
+            </div>
+
+            <div class="integration-card" onclick="showIntegration('jobber')">
+                <h4>Jobber</h4>
+                <p>Sync jobs, clients, and quotes</p>
+                <span class="status-label" id="jobber-status">Disconnected</span>
+            </div>
+
+            <div class="integration-card" onclick="showIntegration('salesforce')">
+                <h4>Salesforce</h4>
+                <p>Sync contacts and opportunities</p>
+                <span class="status-label" id="salesforce-status">Disconnected</span>
+            </div>
+
+            <div class="integration-card" onclick="showIntegration('hubspot')">
+                <h4>HubSpot</h4>
+                <p>Sync contacts and deals</p>
+                <span class="status-label" id="hubspot-status">Disconnected</span>
+            </div>
+
+            <button class="sync-button" onclick="syncAllIntegrations()" style="width: 100%; margin-top: 20px;">
+                Sync All Integrations
+            </button>
+        </div>
+
+        <div class="main-content">
+            <div id="integration-setup" style="display: none;">
+                <h3 id="integration-title">Setup Integration</h3>
+
+                <form id="integrationForm">
+                    <div class="form-group">
+                        <label for="apiKey">API Key:</label>
+                        <input type="password" id="apiKey" required>
+                    </div>
+
+                    <div class="form-group" id="companyIdGroup" style="display: none;">
+                        <label for="companyId">Company ID:</label>
+                        <input type="text" id="companyId">
+                    </div>
+
+                    <div class="form-group" id="crmTypeGroup" style="display: none;">
+                        <label for="crmType">CRM Type:</label>
+                        <select id="crmType">
+                            <option value="salesforce">Salesforce</option>
+                            <option value="hubspot">HubSpot</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="baseUrlGroup" style="display: none;">
+                        <label for="baseUrl">Base URL (if custom):</label>
+                        <input type="text" id="baseUrl" placeholder="https://your-instance.salesforce.com">
+                    </div>
+
+                    <button type="submit">Connect Integration</button>
+                </form>
+
+                <div id="setup-result"></div>
+            </div>
+
+            <div id="sync-results" style="display: none;">
+                <h3>Sync Results</h3>
+                <div id="sync-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentIntegration = '';
+
+        function showIntegration(integration) {
+            currentIntegration = integration;
+            document.getElementById('integration-setup').style.display = 'block';
+            document.getElementById('sync-results').style.display = 'none';
+
+            const title = document.getElementById('integration-title');
+            const companyIdGroup = document.getElementById('companyIdGroup');
+            const crmTypeGroup = document.getElementById('crmTypeGroup');
+            const baseUrlGroup = document.getElementById('baseUrlGroup');
+
+            // Reset form
+            document.getElementById('integrationForm').reset();
+            document.getElementById('setup-result').innerHTML = '';
+
+            switch(integration) {
+                case 'quickbooks':
+                    title.textContent = 'Setup QuickBooks Integration';
+                    companyIdGroup.style.display = 'block';
+                    crmTypeGroup.style.display = 'none';
+                    baseUrlGroup.style.display = 'none';
+                    break;
+                case 'jobber':
+                    title.textContent = 'Setup Jobber Integration';
+                    companyIdGroup.style.display = 'none';
+                    crmTypeGroup.style.display = 'none';
+                    baseUrlGroup.style.display = 'none';
+                    break;
+                case 'salesforce':
+                case 'hubspot':
+                    title.textContent = `Setup ${integration.charAt(0).toUpperCase() + integration.slice(1)} Integration`;
+                    companyIdGroup.style.display = 'none';
+                    crmTypeGroup.style.display = 'block';
+                    baseUrlGroup.style.display = 'block';
+                    document.getElementById('crmType').value = integration;
+                    break;
+            }
+        }
+
+        document.getElementById('integrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const apiKey = document.getElementById('apiKey').value;
+            const companyId = document.getElementById('companyId').value;
+            const crmType = document.getElementById('crmType').value;
+            const baseUrl = document.getElementById('baseUrl').value;
+
+            let endpoint = '';
+            let data = { api_key: apiKey };
+
+            switch(currentIntegration) {
+                case 'quickbooks':
+                    endpoint = '/api/integrations/quickbooks/setup';
+                    data.company_id = companyId;
+                    break;
+                case 'jobber':
+                    endpoint = '/api/integrations/jobber/setup';
+                    break;
+                case 'salesforce':
+                case 'hubspot':
+                    endpoint = '/api/integrations/crm/setup';
+                    data.crm_type = crmType;
+                    data.base_url = baseUrl;
+                    break;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:5000${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                const resultDiv = document.getElementById('setup-result');
+                if (response.ok) {
+                    resultDiv.innerHTML = `<div class="status success">${result.status}</div>`;
+                    updateIntegrationStatus(currentIntegration, 'connected');
+                } else {
+                    resultDiv.innerHTML = `<div class="status error">Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                document.getElementById('setup-result').innerHTML =
+                    `<div class="status error">Error connecting to server: ${error.message}</div>`;
+            }
+        });
+
+        async function syncAllIntegrations() {
+            try {
+                const response = await fetch('http://localhost:5000/api/integrations/sync', {
+                    method: 'POST'
+                });
+
+                const result = await response.json();
+
+                document.getElementById('integration-setup').style.display = 'none';
+                document.getElementById('sync-results').style.display = 'block';
+
+                const syncContent = document.getElementById('sync-content');
+                syncContent.innerHTML = '<h4>Sync Results:</h4>';
+
+                Object.entries(result.results).forEach(([integration, data]) => {
+                    const statusClass = data.error ? 'error' : 'success';
+                    syncContent.innerHTML += `
+                        <div class="status ${statusClass}">
+                            <strong>${integration}:</strong> ${data.error || 'Sync successful'}
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                document.getElementById('sync-content').innerHTML =
+                    `<div class="status error">Error syncing integrations: ${error.message}</div>`;
+            }
+        }
+
+        function updateIntegrationStatus(integration, status) {
+            const statusElement = document.getElementById(`${integration}-status`);
+            const cardElement = statusElement.closest('.integration-card');
+
+            statusElement.textContent = status === 'connected' ? 'Connected' : 'Disconnected';
+            cardElement.className = `integration-card ${status}`;
+        }
+
+        // Check initial integration status
+        window.addEventListener('load', function() {
+            // In a real app, this would check actual integration status
+            // For now, just mark all as disconnected
+            ['quickbooks', 'jobber', 'salesforce', 'hubspot'].forEach(integration => {
+                updateIntegrationStatus(integration, 'disconnected');
+            });
+        });
+    </script>
+</body>
+</html>
