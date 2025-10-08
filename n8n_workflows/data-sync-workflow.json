@@ -1,0 +1,273 @@
+{
+  "name": "AutoQuoter Data Synchronization",
+  "nodes": [
+    {
+      "parameters": {
+        "interval": 24,
+        "unit": "hours"
+      },
+      "id": "schedule-trigger",
+      "name": "Daily Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "https://api.bls.gov/publicAPI/v2/timeseries/data/"
+      },
+      "id": "fetch-bls-data",
+      "name": "Fetch BLS Wage Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "https://api.procore.com/vapid/material-costs"
+      },
+      "id": "fetch-material-costs",
+      "name": "Fetch Material Costs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "https://api.agc.org/construction-cost-index"
+      },
+      "id": "fetch-construction-index",
+      "name": "Fetch Construction Cost Index",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/market-trends"
+      },
+      "id": "update-market-trends",
+      "name": "Update Market Trends Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/contacts/v1/lists/all/contacts/all"
+      },
+      "id": "sync-hubspot-contacts",
+      "name": "Sync HubSpot Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 500]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/dashboard/sync-contacts"
+      },
+      "id": "update-contact-database",
+      "name": "Update Contact Database",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/analytics/refresh"
+      },
+      "id": "refresh-analytics",
+      "name": "Refresh Analytics Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "https://api.sendgrid.com/v3/marketing/contacts"
+      },
+      "id": "sync-sendgrid-contacts",
+      "name": "Sync SendGrid Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1120, 500]
+    },
+    {
+      "parameters": {
+        "interval": 1,
+        "unit": "hours"
+      },
+      "id": "hourly-schedule",
+      "name": "Hourly Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 700]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/quotes/pending"
+      },
+      "id": "check-pending-quotes",
+      "name": "Check Pending Quotes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 700]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['AutoQuoter API'].data['api_url'] }}/api/quote/batch"
+      },
+      "id": "process-batch-quotes",
+      "name": "Process Batch Quotes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 700]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/quotes/update-status"
+      },
+      "id": "update-quote-status",
+      "name": "Update Quote Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 700]
+    }
+  ],
+  "connections": {
+    "Daily Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch BLS Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch BLS Data": {
+      "main": [
+        [
+          {
+            "node": "Fetch Material Costs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Material Costs": {
+      "main": [
+        [
+          {
+            "node": "Fetch Construction Cost Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Construction Cost Index": {
+      "main": [
+        [
+          {
+            "node": "Update Market Trends Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Market Trends Data": {
+      "main": [
+        [
+          {
+            "node": "Sync HubSpot Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync HubSpot Contacts": {
+      "main": [
+        [
+          {
+            "node": "Update Contact Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Contact Database": {
+      "main": [
+        [
+          {
+            "node": "Refresh Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refresh Analytics": {
+      "main": [
+        [
+          {
+            "node": "Sync SendGrid Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hourly Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check Pending Quotes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Pending Quotes": {
+      "main": [
+        [
+          {
+            "node": "Process Batch Quotes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Batch Quotes": {
+      "main": [
+        [
+          {
+            "node": "Update Quote Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null
+}

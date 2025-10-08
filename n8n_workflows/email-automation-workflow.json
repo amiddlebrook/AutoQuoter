@@ -1,0 +1,189 @@
+{
+  "name": "AutoQuoter Email Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "interval": 0,
+        "unit": "hours"
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/contacts/v1/lists/all/contacts/all"
+      },
+      "id": "get-contacts",
+      "name": "Get HubSpot Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['get-contacts'].data['contacts'][0]['properties']['hs_lead_status']['value'] }}",
+              "value2": "quote_sent"
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "filter-quote-sent",
+      "name": "Filter Quote Sent Leads",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['get-contacts'].data['contacts'][0]['identity-profiles'][0]['identities'][0]['value'] }}",
+        "subject": "AutoQuoter - How was your experience?",
+        "emailBody": "={{ 'Hi ' + $node['get-contacts'].data['contacts'][0]['properties']['firstname']['value'] + ',\\n\\nWe hope you found our quote helpful! We\\'d love to hear about your experience.\\n\\nDid you end up hiring a contractor? Was our quote accurate?\\n\\nYour feedback helps us improve our service for other homeowners.\\n\\nPlease reply to this email with your thoughts, or visit our feedback form: https://autoquoter.com/feedback\\n\\nThank you!\\nThe AutoQuoter Team' }}",
+        "options": {}
+      },
+      "id": "send-feedback-request",
+      "name": "Send Feedback Request",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['get-contacts'].data['contacts'][0]['properties']['hs_lead_status']['value'] }}",
+              "value2": "new"
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "filter-new-leads",
+      "name": "Filter New Leads",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['get-contacts'].data['contacts'][0]['identity-profiles'][0]['identities'][0]['value'] }}",
+        "subject": "AutoQuoter - Your Quote Request Status",
+        "emailBody": "={{ 'Hi ' + $node['get-contacts'].data['contacts'][0]['properties']['firstname']['value'] + ',\\n\\nThis is a friendly follow-up on your quote request from 24 hours ago.\\n\\nWe\\'re still working on finding you the best contractors in your area for ' + $node['get-contacts'].data['contacts'][0]['properties']['service_type']['value'] + '.\\n\\nYou should receive your personalized quote within the next hour.\\n\\nIf you need immediate assistance, please call us at 1-800-AUTOQUOTE.\\n\\nBest regards,\\nThe AutoQuoter Team' }}",
+        "options": {}
+      },
+      "id": "send-follow-up-24h",
+      "name": "Send 24h Follow-up",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['get-contacts'].data['contacts'][0]['properties']['hs_lead_status']['value'] }}",
+              "value2": "quote_sent"
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "filter-no-response",
+      "name": "Filter No Response Leads",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 700]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['get-contacts'].data['contacts'][0]['identity-profiles'][0]['identities'][0]['value'] }}",
+        "subject": "AutoQuoter - Special Offer Inside!",
+        "emailBody": "={{ 'Hi ' + $node['get-contacts'].data['contacts'][0]['properties']['firstname']['value'] + ',\\n\\nWe noticed you recently requested a quote for ' + $node['get-contacts'].data['contacts'][0]['properties']['service_type']['value'] + '.\\n\\nAs a valued customer, we\\'d like to offer you:\\n✅ FREE contractor background check\\n✅ Priority contractor matching\\n✅ Extended warranty on work\\n\\nReady to get started? Reply YES or visit: https://autoquoter.com/special-offer\\n\\nThis offer expires in 48 hours.\\n\\nBest regards,\\nThe AutoQuoter Team' }}",
+        "options": {}
+      },
+      "id": "send-special-offer",
+      "name": "Send Special Offer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 700]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get HubSpot Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get HubSpot Contacts": {
+      "main": [
+        [
+          {
+            "node": "Filter Quote Sent Leads",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter New Leads",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter No Response Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Quote Sent Leads": {
+      "main": [
+        [
+          {
+            "node": "Send Feedback Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter New Leads": {
+      "main": [
+        [
+          {
+            "node": "Send 24h Follow-up",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter No Response Leads": {
+      "main": [
+        [
+          {
+            "node": "Send Special Offer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null
+}

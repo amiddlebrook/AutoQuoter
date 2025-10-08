@@ -1,0 +1,691 @@
+{
+  "name": "AutoQuoter Complete Automation Suite",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "lead-webhook-trigger",
+      "name": "Lead Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-ticket",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "support-webhook-trigger",
+      "name": "Support Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 500]
+    },
+    {
+      "parameters": {
+        "interval": 0,
+        "unit": "hours"
+      },
+      "id": "master-schedule-trigger",
+      "name": "Master Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 700]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "timestamp",
+              "value": "={{ $now.format('YYYY-MM-DD HH:mm:ss') }}"
+            }
+          ]
+        }
+      },
+      "id": "set-timestamp",
+      "name": "Set Timestamp",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['lead-webhook-trigger'].data['webhook_path'] || 'none' }}",
+              "value2": "webhook-lead"
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "is-lead-webhook",
+      "name": "Is Lead Webhook?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['support-webhook-trigger'].data['webhook_path'] || 'none' }}",
+              "value2": "support-ticket"
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "is-support-webhook",
+      "name": "Is Support Webhook?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "lead_id",
+              "value": "={{ $now.format('x') }}"
+            }
+          ]
+        }
+      },
+      "id": "process-lead-data",
+      "name": "Process Lead Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/contacts/v1/contact/createOrUpdate/email/{{ $node['lead-webhook-trigger'].data['email'] }}/"
+      },
+      "id": "create-hubspot-contact",
+      "name": "Create HubSpot Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['lead-webhook-trigger'].data['email'] }}",
+        "subject": "AutoQuoter - Quote Request Received",
+        "emailBody": "={{ 'Hi ' + $node['lead-webhook-trigger'].data['name'] + ',\\n\\nThank you for your quote request for ' + $node['lead-webhook-trigger'].data['service'] + ' in ' + $node['lead-webhook-trigger'].data['city'] + ', ' + $node['lead-webhook-trigger'].data['state'] + '.\\n\\nWe\\'ve received your request and are processing it now. You\\'ll receive your personalized quote within the next few minutes.\\n\\nQuote Details:\\n- Service: ' + $node['lead-webhook-trigger'].data['service'] + '\\n- Location: ' + $node['lead-webhook-trigger'].data['city'] + ', ' + $node['lead-webhook-trigger'].data['state'] + ' ' + $node['lead-webhook-trigger'].data['zipcode'] + '\\n- Request ID: ' + $node['process-lead-data'].data['lead_id'] + '\\n\\nBest regards,\\nThe AutoQuoter Team' }}",
+        "options": {}
+      },
+      "id": "send-lead-confirmation",
+      "name": "Send Lead Confirmation",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "toEmail": "contractors@autoquoter.com",
+        "subject": "New Lead: {{ $node['lead-webhook-trigger'].data['service'] }} - {{ $node['lead-webhook-trigger'].data['city'] }}",
+        "emailBody": "={{ 'New quote request received!\\n\\nCustomer: ' + $node['lead-webhook-trigger'].data['name'] + '\\nEmail: ' + $node['lead-webhook-trigger'].data['email'] + '\\nService: ' + $node['lead-webhook-trigger'].data['service'] + '\\nLocation: ' + $node['lead-webhook-trigger'].data['city'] + ', ' + $node['lead-webhook-trigger'].data['state'] + ' ' + $node['lead-webhook-trigger'].data['zipcode'] + '\\nPhone: ' + $node['lead-webhook-trigger'].data['phone'] + '\\n\\nLead ID: ' + $node['process-lead-data'].data['lead_id'] + '\\nTimestamp: ' + $node['set-timestamp'].data['timestamp'] + '\\n\\nPlease follow up within 15 minutes.' }}",
+        "options": {}
+      },
+      "id": "notify-contractors",
+      "name": "Notify Contractors",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['AutoQuoter API'].data['api_url'] }}/api/quote"
+      },
+      "id": "generate-quote",
+      "name": "Generate Quote",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['lead-webhook-trigger'].data['email'] }}",
+        "subject": "Your AutoQuoter Quote is Ready",
+        "emailBody": "={{ 'Hi ' + $node['lead-webhook-trigger'].data['name'] + ',\\n\\nYour personalized quote is ready!\\n\\nQuote Summary:\\n' + $node['generate-quote'].data['summary'] + '\\n\\nLow Range: $' + $node['generate-quote'].data['low_range'] + '\\nMedian Range: $' + $node['generate-quote'].data['median_range'] + '\\nHigh Range: $' + $node['generate-quote'].data['high_range'] + '\\n\\nView full details and connect with contractors at: ' + $node['generate-quote'].data['quote_url'] + '\\n\\nQuestions? Reply to this email or call us.\\n\\nBest regards,\\nThe AutoQuoter Team' }}",
+        "options": {}
+      },
+      "id": "send-quote-email",
+      "name": "Send Quote Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1340, 400]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "ticket_id",
+              "value": "={{ 'TICKET-' + $now.format('YYYYMMDD-HHmmss') }}"
+            },
+            {
+              "name": "priority",
+              "value": "={{ $node['support-webhook-trigger'].data['urgency'] === 'high' ? 'high' : 'medium' }}"
+            }
+          ]
+        }
+      },
+      "id": "process-support-data",
+      "name": "Process Support Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/tickets/v1/tickets"
+      },
+      "id": "create-support-ticket",
+      "name": "Create Support Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1120, 500]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['support-webhook-trigger'].data['email'] }}",
+        "subject": "AutoQuoter Support Ticket Received - {{ $node['process-support-data'].data['ticket_id'] }}",
+        "emailBody": "={{ 'Hi ' + $node['support-webhook-trigger'].data['name'] + ',\\n\\nThank you for contacting AutoQuoter Support!\\n\\nWe\\'ve received your ticket and assigned it ID: ' + $node['process-support-data'].data['ticket_id'] + '\\n\\n📋 Ticket Details:\\n- Subject: ' + $node['support-webhook-trigger'].data['subject'] + '\\n- Priority: ' + $node['process-support-data'].data['priority'] + '\\n- Status: New\\n\\nOur support team will respond within:\\n' + ($node['process-support-data'].data['priority'] === 'high' ? '2 hours' : '24 hours') + '\\n\\nYou can track your ticket status at: https://autoquoter.com/support/ticket/' + $node['process-support-data'].data['ticket_id'] + '\\n\\nBest regards,\\nAutoQuoter Support Team' }}",
+        "options": {}
+      },
+      "id": "send-support-confirmation",
+      "name": "Send Support Confirmation",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1340, 500]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['process-support-data'].data['priority'] }}",
+              "value2": "high"
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "is-urgent-support",
+      "name": "Is Urgent Support?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [1120, 600]
+    },
+    {
+      "parameters": {
+        "toEmail": "urgent-support@autoquoter.com",
+        "subject": "🚨 URGENT Support Ticket - {{ $node['process-support-data'].data['ticket_id'] }}",
+        "emailBody": "={{ 'URGENT SUPPORT TICKET RECEIVED\\n\\n🆘 Priority: HIGH\\n👤 Customer: ' + $node['support-webhook-trigger'].data['name'] + '\\n📧 Email: ' + $node['support-webhook-trigger'].data['email'] + '\\n🎫 Ticket ID: ' + $node['process-support-data'].data['ticket_id'] + '\\n📝 Subject: ' + $node['support-webhook-trigger'].data['subject'] + '\\n\\n📄 Description:\\n' + $node['support-webhook-trigger'].data['message'] + '\\n\\n⚡ IMMEDIATE ATTENTION REQUIRED\\n\\nRespond within 2 hours.' }}",
+        "options": {}
+      },
+      "id": "notify-urgent-support",
+      "name": "Notify Urgent Support",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1340, 600]
+    },
+    {
+      "parameters": {
+        "toEmail": "support@autoquoter.com",
+        "subject": "New Support Ticket - {{ $node['process-support-data'].data['ticket_id'] }}",
+        "emailBody": "={{ 'New Support Ticket Received\\n\\n👤 Customer: ' + $node['support-webhook-trigger'].data['name'] + '\\n📧 Email: ' + $node['support-webhook-trigger'].data['email'] + '\\n🎫 Ticket ID: ' + $node['process-support-data'].data['ticket_id'] + '\\n📝 Subject: ' + $node['support-webhook-trigger'].data['subject'] + '\\n⏰ Priority: ' + $node['process-support-data'].data['priority'] + '\\n\\n📄 Description:\\n' + $node['support-webhook-trigger'].data['message'] + '\\n\\nView in HubSpot: ' + $node['create-support-ticket'].data['ticket_url'] }}",
+        "options": {}
+      },
+      "id": "notify-support-team",
+      "name": "Notify Support Team",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1560, 600]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "https://api.bls.gov/publicAPI/v2/timeseries/data/"
+      },
+      "id": "fetch-bls-data",
+      "name": "Fetch BLS Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 800]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "https://api.procore.com/vapid/material-costs"
+      },
+      "id": "fetch-material-costs",
+      "name": "Fetch Material Costs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 800]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "https://api.agc.org/construction-cost-index"
+      },
+      "id": "fetch-construction-index",
+      "name": "Fetch Construction Cost Index",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1120, 800]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/market-trends"
+      },
+      "id": "update-market-trends",
+      "name": "Update Market Trends",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1340, 800]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/contacts/v1/lists/all/contacts/all"
+      },
+      "id": "sync-hubspot-contacts",
+      "name": "Sync HubSpot Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 1000]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/dashboard/sync-contacts"
+      },
+      "id": "update-contact-database",
+      "name": "Update Contact Database",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 1000]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/analytics/refresh"
+      },
+      "id": "refresh-analytics",
+      "name": "Refresh Analytics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1120, 1000]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "https://api.sendgrid.com/v3/marketing/contacts"
+      },
+      "id": "sync-sendgrid-contacts",
+      "name": "Sync SendGrid Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [1340, 1000]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/analytics/weekly-report"
+      },
+      "id": "generate-weekly-report",
+      "name": "Generate Weekly Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 1200]
+    },
+    {
+      "parameters": {
+        "toEmail": "admin@autoquoter.com",
+        "subject": "AutoQuoter Weekly Performance Report - {{ $now.format('YYYY-MM-DD') }}",
+        "emailBody": "={{ 'Weekly Performance Report\\n\\n📊 Key Metrics:\\n' + $node['generate-weekly-report'].data['summary'] + '\\n\\n📈 Growth Trends:\\n' + $node['generate-weekly-report'].data['growth'] + '\\n\\n🎯 Top Performing Services:\\n' + $node['generate-weekly-report'].data['top_services'] + '\\n\\n📍 Geographic Performance:\\n' + $node['generate-weekly-report'].data['geographic'] + '\\n\\n🚨 Alerts & Issues:\\n' + $node['generate-weekly-report'].data['alerts'] + '\\n\\nView detailed report: ' + $node['generate-weekly-report'].data['report_url'] }}",
+        "options": {}
+      },
+      "id": "send-admin-report",
+      "name": "Send Admin Report",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 1200]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/analytics/daily-summary"
+      },
+      "id": "generate-daily-summary",
+      "name": "Generate Daily Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 1400]
+    },
+    {
+      "parameters": {
+        "toEmail": "team@autoquoter.com",
+        "subject": "AutoQuoter Daily Summary - {{ $now.format('YYYY-MM-DD') }}",
+        "emailBody": "={{ 'Daily Operations Summary\\n\\n📊 Today\\'s Numbers:\\n' + $node['generate-daily-summary'].data['today_stats'] + '\\n\\n🔔 Recent Activity:\\n' + $node['generate-daily-summary'].data['recent_activity'] + '\\n\\n⚠️ System Health:\\n' + $node['generate-daily-summary'].data['system_health'] + '\\n\\n📈 Performance Metrics:\\n' + $node['generate-daily-summary'].data['performance'] }}",
+        "options": {}
+      },
+      "id": "send-daily-summary",
+      "name": "Send Daily Summary",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 1400]
+    }
+  ],
+  "connections": {
+    "Lead Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Support Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Master Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Timestamp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Timestamp": {
+      "main": [
+        [
+          {
+            "node": "Is Lead Webhook?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Support Webhook?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch BLS Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Lead Webhook?": {
+      "main": [
+        [
+          {
+            "node": "Process Lead Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Lead Data": {
+      "main": [
+        [
+          {
+            "node": "Create HubSpot Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Quote",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create HubSpot Contact": {
+      "main": [
+        [
+          {
+            "node": "Send Lead Confirmation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Contractors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Quote": {
+      "main": [
+        [
+          {
+            "node": "Send Quote Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Support Webhook?": {
+      "main": [
+        [
+          {
+            "node": "Process Support Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Support Data": {
+      "main": [
+        [
+          {
+            "node": "Create Support Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Support Ticket": {
+      "main": [
+        [
+          {
+            "node": "Send Support Confirmation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is Urgent Support?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Urgent Support?": {
+      "main": [
+        [
+          {
+            "node": "Notify Urgent Support",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Urgent Support": {
+      "main": [
+        [
+          {
+            "node": "Notify Support Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch BLS Data": {
+      "main": [
+        [
+          {
+            "node": "Fetch Material Costs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Material Costs": {
+      "main": [
+        [
+          {
+            "node": "Fetch Construction Index",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Construction Index": {
+      "main": [
+        [
+          {
+            "node": "Update Market Trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Market Trends": {
+      "main": [
+        [
+          {
+            "node": "Sync HubSpot Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync HubSpot Contacts": {
+      "main": [
+        [
+          {
+            "node": "Update Contact Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Contact Database": {
+      "main": [
+        [
+          {
+            "node": "Refresh Analytics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refresh Analytics": {
+      "main": [
+        [
+          {
+            "node": "Sync SendGrid Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sync SendGrid Contacts": {
+      "main": [
+        [
+          {
+            "node": "Generate Weekly Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Weekly Report": {
+      "main": [
+        [
+          {
+            "node": "Send Admin Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Admin Report": {
+      "main": [
+        [
+          {
+            "node": "Generate Daily Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Daily Summary": {
+      "main": [
+        [
+          {
+            "node": "Send Daily Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null
+}

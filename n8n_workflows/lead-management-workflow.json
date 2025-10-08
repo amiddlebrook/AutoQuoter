@@ -1,0 +1,186 @@
+{
+  "name": "AutoQuoter Lead Management",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "webhook-lead",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "lead_id",
+              "value": "={{ $now.format('x') }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ $now.format('YYYY-MM-DD HH:mm:ss') }}"
+            }
+          ]
+        }
+      },
+      "id": "set-lead-id",
+      "name": "Set Lead ID",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['Webhook Trigger'].data['service'] }}-{{ $node['Webhook Trigger'].data['zipcode'] }}-{{ $now.format('x') }}"
+      },
+      "id": "create-hubspot-contact",
+      "name": "Create HubSpot Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['Webhook Trigger'].data['email'] }}",
+        "subject": "AutoQuoter - Quote Request Received",
+        "emailBody": "={{ 'Hi ' + $node['Webhook Trigger'].data['name'] + ',\\n\\nThank you for your quote request for ' + $node['Webhook Trigger'].data['service'] + ' in ' + $node['Webhook Trigger'].data['city'] + ', ' + $node['Webhook Trigger'].data['state'] + '.\\n\\nWe\\'ve received your request and are processing it now. You\\'ll receive your personalized quote within the next few minutes.\\n\\nQuote Details:\\n- Service: ' + $node['Webhook Trigger'].data['service'] + '\\n- Location: ' + $node['Webhook Trigger'].data['city'] + ', ' + $node['Webhook Trigger'].data['state'] + ' ' + $node['Webhook Trigger'].data['zipcode'] + '\\n- Request ID: ' + $node['set-lead-id'].data['lead_id'] + '\\n\\nBest regards,\\nThe AutoQuoter Team' }}",
+        "options": {}
+      },
+      "id": "send-confirmation-email",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "toEmail": "contractors@autoquoter.com",
+        "subject": "New Lead: {{ $node['Webhook Trigger'].data['service'] }} - {{ $node['Webhook Trigger'].data['city'] }}",
+        "emailBody": "={{ 'New quote request received!\\n\\nCustomer: ' + $node['Webhook Trigger'].data['name'] + '\\nEmail: ' + $node['Webhook Trigger'].data['email'] + '\\nService: ' + $node['Webhook Trigger'].data['service'] + '\\nLocation: ' + $node['Webhook Trigger'].data['city'] + ', ' + $node['Webhook Trigger'].data['state'] + ' ' + $node['Webhook Trigger'].data['zipcode'] + '\\nPhone: ' + $node['Webhook Trigger'].data['phone'] + '\\n\\nLead ID: ' + $node['set-lead-id'].data['lead_id'] + '\\nTimestamp: ' + $node['set-lead-id'].data['timestamp'] + '\\n\\nPlease follow up within 15 minutes.' }}",
+        "options": {}
+      },
+      "id": "notify-contractors",
+      "name": "Notify Contractors",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['AutoQuoter API'].data['api_url'] }}/api/quote"
+      },
+      "id": "generate-quote-api",
+      "name": "Generate Quote via API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['Webhook Trigger'].data['email'] }}",
+        "subject": "Your AutoQuoter Quote is Ready",
+        "emailBody": "={{ 'Hi ' + $node['Webhook Trigger'].data['name'] + ',\\n\\nYour personalized quote is ready!\\n\\nQuote Summary:\\n' + $node['generate-quote-api'].data['summary'] + '\\n\\nLow Range: $' + $node['generate-quote-api'].data['low_range'] + '\\nMedian Range: $' + $node['generate-quote-api'].data['median_range'] + '\\nHigh Range: $' + $node['generate-quote-api'].data['high_range'] + '\\n\\nView full details and connect with contractors at: ' + $node['generate-quote-api'].data['quote_url'] + '\\n\\nQuestions? Reply to this email or call us.\\n\\nBest regards,\\nThe AutoQuoter Team' }}",
+        "options": {}
+      },
+      "id": "send-quote-email",
+      "name": "Send Quote Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "quote_sent"
+            }
+          ]
+        }
+      },
+      "id": "update-lead-status",
+      "name": "Update Lead Status",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [1120, 500]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Lead ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Lead ID": {
+      "main": [
+        [
+          {
+            "node": "Create HubSpot Contact",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Quote via API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create HubSpot Contact": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Contractors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Quote via API": {
+      "main": [
+        [
+          {
+            "node": "Send Quote Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Quote Email": {
+      "main": [
+        [
+          {
+            "node": "Update Lead Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null
+}

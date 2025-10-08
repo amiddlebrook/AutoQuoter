@@ -1,0 +1,246 @@
+{
+  "name": "AutoQuoter Marketing Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "interval": 1,
+        "unit": "weeks"
+      },
+      "id": "weekly-marketing-schedule",
+      "name": "Weekly Marketing Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/contacts/v1/lists/123/contacts/all"
+      },
+      "id": "get-active-customers",
+      "name": "Get Active Customers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['get-active-customers'].data['contacts'][0]['identity-profiles'][0]['identities'][0]['value'] }}",
+        "subject": "AutoQuoter Weekly Tips - Save Money on Home Services",
+        "emailBody": "={{ 'Hi ' + $node['get-active-customers'].data['contacts'][0]['properties']['firstname']['value'] + ',\\n\\n💡 Weekly Home Service Tip from AutoQuoter\\n\\nThis week: ' + $node['get-seasonal-content'].data['tip_title'] + '\\n\\n' + $node['get-seasonal-content'].data['tip_content'] + '\\n\\n🔧 Need help with this? Get instant quotes for any home service:\\nhttps://autoquoter.com/quote?service=' + $node['get-seasonal-content'].data['related_service'] + '\\n\\n📊 Market Update: ' + $node['get-seasonal-content'].data['service'] + ' costs are ' + $node['get-seasonal-content'].data['price_trend'] + ' this month.\\n\\nBest regards,\\nThe AutoQuoter Team\\n\\nP.S. Refer a friend and both get $25 off your next project!' }}",
+        "options": {}
+      },
+      "id": "send-weekly-newsletter",
+      "name": "Send Weekly Newsletter",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['Content API'].data['api_url'] }}/api/content/seasonal-tips"
+      },
+      "id": "get-seasonal-content",
+      "name": "Get Seasonal Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "interval": 1,
+        "unit": "months"
+      },
+      "id": "monthly-promotion-schedule",
+      "name": "Monthly Promotion Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 500]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/contacts/v1/lists/456/contacts/all"
+      },
+      "id": "get-inactive-customers",
+      "name": "Get Inactive Customers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 500]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['get-inactive-customers'].data['contacts'][0]['identity-profiles'][0]['identities'][0]['value'] }}",
+        "subject": "🔥 AutoQuoter Special: Limited Time Offer Inside!",
+        "emailBody": "={{ 'Hi ' + $node['get-inactive-customers'].data['contacts'][0]['properties']['firstname']['value'] + ',\\n\\nWe haven\\'t seen you in a while! We miss helping you find great contractors.\\n\\n🎉 SPECIAL LIMITED-TIME OFFER:\\n' + $node['get-monthly-promotion'].data['offer_title'] + '\\n\\n' + $node['get-monthly-promotion'].data['offer_description'] + '\\n\\n⏰ Expires: ' + $node['get-monthly-promotion'].data['expiry_date'] + '\\n\\n💰 Use Code: ' + $node['get-monthly-promotion'].data['promo_code'] + '\\n\\n👉 Claim your offer: https://autoquoter.com/promotion/' + $node['get-monthly-promotion'].data['promo_id'] + '\\n\\nQuestions? Reply to this email.\\n\\nBest regards,\\nThe AutoQuoter Team' }}",
+        "options": {}
+      },
+      "id": "send-reactivation-offer",
+      "name": "Send Reactivation Offer",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['Content API'].data['api_url'] }}/api/promotions/monthly"
+      },
+      "id": "get-monthly-promotion",
+      "name": "Get Monthly Promotion",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 600]
+    },
+    {
+      "parameters": {
+        "interval": 1,
+        "unit": "days"
+      },
+      "id": "daily-engagement-schedule",
+      "name": "Daily Engagement Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 700]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/contacts/v1/lists/789/contacts/recent"
+      },
+      "id": "get-recent-contacts",
+      "name": "Get Recent Contacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 700]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['get-recent-contacts'].data['contacts'][0]['identity-profiles'][0]['identities'][0]['value'] }}",
+        "subject": "Welcome to AutoQuoter - Here's How to Get Started",
+        "emailBody": "={{ 'Welcome to AutoQuoter, ' + $node['get-recent-contacts'].data['contacts'][0]['properties']['firstname']['value'] + '!\\n\\n🎉 Thanks for joining our community of smart homeowners!\\n\\nHere\\'s your quick start guide:\\n\\n1️⃣ Get Instant Quotes: Visit autoquoter.com/quote\\n2️⃣ Compare Contractors: See ratings, reviews, and pricing\\n3️⃣ Track Your Projects: Monitor progress and payments\\n4️⃣ Get Expert Tips: Weekly home maintenance advice\\n\\n💡 Pro Tip: Our AI-powered quotes are 85% accurate based on local market data!\\n\\nNeed help? Our support team is here 24/7.\\n\\nHappy quoting!\\nThe AutoQuoter Team\\n\\nP.S. Follow us on social media for daily tips and contractor spotlights!' }}",
+        "options": {}
+      },
+      "id": "send-welcome-sequence",
+      "name": "Send Welcome Sequence",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [680, 700]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/contacts/v1/contact/vid/{{ $node['get-recent-contacts'].data['contacts'][0]['vid'] }}/profile"
+      },
+      "id": "update-contact-stage",
+      "name": "Update Contact Stage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 700]
+    }
+  ],
+  "connections": {
+    "Weekly Marketing Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Seasonal Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Seasonal Content": {
+      "main": [
+        [
+          {
+            "node": "Get Active Customers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Customers": {
+      "main": [
+        [
+          {
+            "node": "Send Weekly Newsletter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monthly Promotion Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Monthly Promotion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Monthly Promotion": {
+      "main": [
+        [
+          {
+            "node": "Get Inactive Customers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Inactive Customers": {
+      "main": [
+        [
+          {
+            "node": "Send Reactivation Offer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Engagement Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Contacts": {
+      "main": [
+        [
+          {
+            "node": "Send Welcome Sequence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Welcome Sequence": {
+      "main": [
+        [
+          {
+            "node": "Update Contact Stage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null
+}

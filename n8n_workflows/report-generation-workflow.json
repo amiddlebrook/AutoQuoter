@@ -1,0 +1,280 @@
+{
+  "name": "AutoQuoter Report Generation",
+  "nodes": [
+    {
+      "parameters": {
+        "interval": 7,
+        "unit": "days"
+      },
+      "id": "weekly-schedule",
+      "name": "Weekly Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/analytics/weekly-report"
+      },
+      "id": "generate-weekly-report",
+      "name": "Generate Weekly Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "toEmail": "admin@autoquoter.com",
+        "subject": "AutoQuoter Weekly Performance Report - {{ $now.format('YYYY-MM-DD') }}",
+        "emailBody": "={{ 'Weekly Performance Report\\n\\n📊 Key Metrics:\\n' + $node['generate-weekly-report'].data['summary'] + '\\n\\n📈 Growth Trends:\\n' + $node['generate-weekly-report'].data['growth'] + '\\n\\n🎯 Top Performing Services:\\n' + $node['generate-weekly-report'].data['top_services'] + '\\n\\n📍 Geographic Performance:\\n' + $node['generate-weekly-report'].data['geographic'] + '\\n\\n🚨 Alerts & Issues:\\n' + $node['generate-weekly-report'].data['alerts'] + '\\n\\nView detailed report: ' + $node['generate-weekly-report'].data['report_url'] + '\\n\\nBest regards,\\nAutoQuoter Analytics System' }}",
+        "options": {}
+      },
+      "id": "send-admin-report",
+      "name": "Send Admin Report",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "interval": 1,
+        "unit": "days"
+      },
+      "id": "daily-schedule",
+      "name": "Daily Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 500]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/analytics/daily-summary"
+      },
+      "id": "generate-daily-summary",
+      "name": "Generate Daily Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 500]
+    },
+    {
+      "parameters": {
+        "toEmail": "team@autoquoter.com",
+        "subject": "AutoQuoter Daily Summary - {{ $now.format('YYYY-MM-DD') }}",
+        "emailBody": "={{ 'Daily Operations Summary\\n\\n📊 Today\\'s Numbers:\\n' + $node['generate-daily-summary'].data['today_stats'] + '\\n\\n🔔 Recent Activity:\\n' + $node['generate-daily-summary'].data['recent_activity'] + '\\n\\n⚠️ System Health:\\n' + $node['generate-daily-summary'].data['system_health'] + '\\n\\n📈 Performance Metrics:\\n' + $node['generate-daily-summary'].data['performance'] + '\\n\\nBest regards,\\nAutoQuoter Operations' }}",
+        "options": {}
+      },
+      "id": "send-daily-summary",
+      "name": "Send Daily Summary",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "interval": 30,
+        "unit": "minutes"
+      },
+      "id": "monitor-schedule",
+      "name": "Monitor Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 700]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['Sentry API'].data['api_url'] }}/api/0/projects/autoquoter/autoquoter/issues/"
+      },
+      "id": "check-sentry-errors",
+      "name": "Check Sentry Errors",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 700]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $node['check-sentry-errors'].data['issues'].length }}",
+              "operation": ">",
+              "value2": 0
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "has-errors",
+      "name": "Has New Errors?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 700]
+    },
+    {
+      "parameters": {
+        "toEmail": "devops@autoquoter.com",
+        "subject": "🚨 AutoQuoter Error Alert - {{ $node['check-sentry-errors'].data['issues'][0]['title'] }}",
+        "emailBody": "={{ 'Error Detected in AutoQuoter\\n\\n🔥 Error: ' + $node['check-sentry-errors'].data['issues'][0]['title'] + '\\n📍 Location: ' + $node['check-sentry-errors'].data['issues'][0]['culprit'] + '\\n⏰ Time: ' + $node['check-sentry-errors'].data['issues'][0]['lastSeen'] + '\\n🔢 Count: ' + $node['check-sentry-errors'].data['issues'][0]['count'] + '\\n\\nView in Sentry: ' + $node['check-sentry-errors'].data['issues'][0]['permalink'] + '\\n\\nThis is an automated alert from AutoQuoter monitoring.' }}",
+        "options": {}
+      },
+      "id": "send-error-alert",
+      "name": "Send Error Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 700]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['PostgreSQL Database'].data['connection_string'] }}/api/health/system-metrics"
+      },
+      "id": "check-system-metrics",
+      "name": "Check System Metrics",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 900]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $node['check-system-metrics'].data['response_time'] }}",
+              "operation": ">",
+              "value2": 500
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "id": "performance-issues",
+      "name": "Performance Issues?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 900]
+    },
+    {
+      "parameters": {
+        "toEmail": "devops@autoquoter.com",
+        "subject": "⚠️ AutoQuoter Performance Alert",
+        "emailBody": "={{ 'Performance Issue Detected\\n\\n🐌 Slow Response Time: ' + $node['check-system-metrics'].data['response_time'] + 'ms\\n📊 Average: ' + $node['check-system-metrics'].data['avg_response_time'] + 'ms\\n🔢 Requests/min: ' + $node['check-system-metrics'].data['requests_per_minute'] + '\\n💾 Memory Usage: ' + $node['check-system-metrics'].data['memory_usage'] + '%\\n\\nThis may indicate system overload or performance degradation.\\n\\nCheck system status: ' + $node['check-system-metrics'].data['monitoring_url'] }}",
+        "options": {}
+      },
+      "id": "send-performance-alert",
+      "name": "Send Performance Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 900]
+    }
+  ],
+  "connections": {
+    "Weekly Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate Weekly Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Weekly Report": {
+      "main": [
+        [
+          {
+            "node": "Send Admin Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate Daily Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Daily Summary": {
+      "main": [
+        [
+          {
+            "node": "Send Daily Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Monitor Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Check Sentry Errors",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Check System Metrics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Sentry Errors": {
+      "main": [
+        [
+          {
+            "node": "Has New Errors?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has New Errors?": {
+      "main": [
+        [
+          {
+            "node": "Send Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check System Metrics": {
+      "main": [
+        [
+          {
+            "node": "Performance Issues?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Performance Issues?": {
+      "main": [
+        [
+          {
+            "node": "Send Performance Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null
+}

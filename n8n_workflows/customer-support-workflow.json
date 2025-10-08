@@ -1,0 +1,284 @@
+{
+  "name": "AutoQuoter Customer Support",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "support-ticket",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "support-webhook",
+      "name": "Support Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "ticket_id",
+              "value": "={{ 'TICKET-' + $now.format('YYYYMMDD-HHmmss') }}"
+            },
+            {
+              "name": "priority",
+              "value": "={{ $node['support-webhook'].data['urgency'] === 'high' ? 'high' : 'medium' }}"
+            },
+            {
+              "name": "status",
+              "value": "new"
+            }
+          ]
+        }
+      },
+      "id": "create-ticket-data",
+      "name": "Create Ticket Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/contacts/v1/contact/createOrUpdate/email/{{ $node['support-webhook'].data['email'] }}/"
+      },
+      "id": "find-or-create-contact",
+      "name": "Find or Create Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/tickets/v1/tickets"
+      },
+      "id": "create-hubspot-ticket",
+      "name": "Create HubSpot Ticket",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "toEmail": "={{ $node['support-webhook'].data['email'] }}",
+        "subject": "AutoQuoter Support Ticket Received - {{ $node['create-ticket-data'].data['ticket_id'] }}",
+        "emailBody": "={{ 'Hi ' + $node['support-webhook'].data['name'] + ',\\n\\nThank you for contacting AutoQuoter Support!\\n\\nWe\\'ve received your ticket and assigned it ID: ' + $node['create-ticket-data'].data['ticket_id'] + '\\n\\n📋 Ticket Details:\\n- Subject: ' + $node['support-webhook'].data['subject'] + '\\n- Priority: ' + $node['create-ticket-data'].data['priority'] + '\\n- Status: ' + $node['create-ticket-data'].data['status'] + '\\n\\nOur support team will respond within:\\n' + ($node['create-ticket-data'].data['priority'] === 'high' ? '2 hours' : '24 hours') + '\\n\\nYou can track your ticket status at: https://autoquoter.com/support/ticket/' + $node['create-ticket-data'].data['ticket_id'] + '\\n\\nBest regards,\\nAutoQuoter Support Team' }}",
+        "options": {}
+      },
+      "id": "send-confirmation-email",
+      "name": "Send Confirmation Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['create-ticket-data'].data['priority'] }}",
+              "value2": "high"
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "is-high-priority",
+      "name": "Is High Priority?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 500]
+    },
+    {
+      "parameters": {
+        "toEmail": "urgent-support@autoquoter.com",
+        "subject": "🚨 URGENT Support Ticket - {{ $node['create-ticket-data'].data['ticket_id'] }}",
+        "emailBody": "={{ 'URGENT SUPPORT TICKET RECEIVED\\n\\n🆘 Priority: HIGH\\n👤 Customer: ' + $node['support-webhook'].data['name'] + '\\n📧 Email: ' + $node['support-webhook'].data['email'] + '\\n🎫 Ticket ID: ' + $node['create-ticket-data'].data['ticket_id'] + '\\n📝 Subject: ' + $node['support-webhook'].data['subject'] + '\\n\\n📄 Description:\\n' + $node['support-webhook'].data['message'] + '\\n\\n⚡ IMMEDIATE ATTENTION REQUIRED\\n\\nRespond within 2 hours.\\nView ticket: https://autoquoter.com/support/ticket/' + $node['create-ticket-data'].data['ticket_id'] }}",
+        "options": {}
+      },
+      "id": "notify-urgent-support",
+      "name": "Notify Urgent Support",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 500]
+    },
+    {
+      "parameters": {
+        "toEmail": "support@autoquoter.com",
+        "subject": "New Support Ticket - {{ $node['create-ticket-data'].data['ticket_id'] }}",
+        "emailBody": "={{ 'New Support Ticket Received\\n\\n👤 Customer: ' + $node['support-webhook'].data['name'] + '\\n📧 Email: ' + $node['support-webhook'].data['email'] + '\\n🎫 Ticket ID: ' + $node['create-ticket-data'].data['ticket_id'] + '\\n📝 Subject: ' + $node['support-webhook'].data['subject'] + '\\n⏰ Priority: ' + $node['create-ticket-data'].data['priority'] + '\\n\\n📄 Description:\\n' + $node['support-webhook'].data['message'] + '\\n\\nView in HubSpot: ' + $node['create-hubspot-ticket'].data['ticket_url'] + '\\n\\nRespond within ' + ($node['create-ticket-data'].data['priority'] === 'high' ? '2 hours' : '24 hours') + '.' }}",
+        "options": {}
+      },
+      "id": "notify-support-team",
+      "name": "Notify Support Team",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 600]
+    },
+    {
+      "parameters": {
+        "interval": 2,
+        "unit": "hours"
+      },
+      "id": "check-escalations",
+      "name": "Check Escalations Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 700]
+    },
+    {
+      "parameters": {
+        "mode": "webhook",
+        "webhookUri": "={{ $node['HubSpot API'].data['api_url'] }}/tickets/v1/tickets?status=open&priority=high"
+      },
+      "id": "get-open-high-priority",
+      "name": "Get Open High Priority Tickets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [460, 700]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $node['get-open-high-priority'].data['results'].length }}",
+              "operation": ">",
+              "value2": 0
+            }
+          ]
+        },
+        "combineOperation": "all"
+      },
+      "id": "has-old-tickets",
+      "name": "Has Old High Priority Tickets?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [680, 700]
+    },
+    {
+      "parameters": {
+        "toEmail": "manager@autoquoter.com",
+        "subject": "⚠️ ESCALATION: Unresolved High Priority Tickets",
+        "emailBody": "={{ 'SUPPORT ESCALATION NOTICE\\n\\n🚨 There are ' + $node['get-open-high-priority'].data['results'].length + ' high priority tickets older than 2 hours:\\n\\n' + $node['get-open-high-priority'].data['results'].map(ticket => '• ' + ticket.subject + ' (ID: ' + ticket.id + ') - ' + ticket.hours_old + ' hours old').join('\\n') + '\\n\\nThese tickets require immediate attention from support management.\\n\\nView all tickets: https://app.hubspot.com/contacts/' + $node['HubSpot API'].data['portal_id'] + '/tickets/' }}",
+        "options": {}
+      },
+      "id": "escalate-to-manager",
+      "name": "Escalate to Manager",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [900, 700]
+    }
+  ],
+  "connections": {
+    "Support Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create Ticket Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Ticket Data": {
+      "main": [
+        [
+          {
+            "node": "Find or Create Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find or Create Contact": {
+      "main": [
+        [
+          {
+            "node": "Create HubSpot Ticket",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create HubSpot Ticket": {
+      "main": [
+        [
+          {
+            "node": "Send Confirmation Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Is High Priority?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is High Priority?": {
+      "main": [
+        [
+          {
+            "node": "Notify Urgent Support",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Urgent Support": {
+      "main": [
+        [
+          {
+            "node": "Notify Support Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Escalations Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Open High Priority Tickets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Open High Priority Tickets": {
+      "main": [
+        [
+          {
+            "node": "Has Old High Priority Tickets?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Old High Priority Tickets?": {
+      "main": [
+        [
+          {
+            "node": "Escalate to Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null
+}
