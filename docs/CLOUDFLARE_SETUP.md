@@ -20,12 +20,12 @@ Copy your Cloudflare **Account ID** from the Cloudflare dashboard.
 
 In this repository:
 
-\`Settings → Secrets and variables → Actions → New repository secret\`
+`Settings → Secrets and variables → Actions → New repository secret`
 
 Create:
 
-- \`CLOUDFLARE_API_TOKEN\` (the API token)
-- \`CLOUDFLARE_ACCOUNT_ID\` (your Cloudflare account ID)
+- `CLOUDFLARE_API_TOKEN` (the API token)
+- `CLOUDFLARE_ACCOUNT_ID` (your Cloudflare account ID)
 
 **Never commit these values** to a source file, pull request or log.
 
@@ -34,36 +34,36 @@ Create:
 The workflow is [.github/workflows/cloudflare.yml](../.github/workflows/cloudflare.yml).
 
 - Every pull request runs syntax checks, HTTP endpoint tests and asset checks.
-- A push to \`master\` runs those checks, then executes \`wrangler deploy\` using the two secrets.
-- The Worker name is **autoquoter** and static files come from \`frontend/\`.
+- A push to `master` runs those checks, then executes `wrangler deploy` using the two secrets.
+- The Worker name is **autoquoter** and static files come from `frontend/`.
 - GitHub Actions will show the deployment URL in the publish step.
 
-With an existing \`autoquoter\` Worker under the same Cloudflare account, deploying with the same name can replace that Worker's existing code. Check your account and intended production target before merging. There are no database migrations.
+With an existing `autoquoter` Worker under the same Cloudflare account, deploying with the same name can replace that Worker's existing code. Check your account and intended production target before merging. There are no database migrations.
 
 ## 5. Verify the deployment
 
 Open:
 
-- \`https://autoquoter.<your-cloudflare-subdomain>.workers.dev/\`
-- \`https://autoquoter.<your-cloudflare-subdomain>.workers.dev/api/health\`
+- `https://autoquoter.<your-cloudflare-subdomain>.workers.dev/`
+- `https://autoquoter.<your-cloudflare-subdomain>.workers.dev/api/health`
 
 Expected health JSON:
 
-\`\`\`json
+```json
 {"status":"ok","engine":"cloudflare-worker","dataSource":"illustrative planning assumptions"}
-\`\`\`
+```
 
 On the website, calculate a heat pump estimate, save it, change its pipeline status, print it, download a JSON backup, and reload to confirm browser-local persistence.
 
 ## Local development
 
-\`\`\`powershell
+```powershell
 git clone https://github.com/amiddlebrook/AutoQuoter.git
 cd AutoQuoter
 npm test
 npm run check
 npx wrangler@4 dev
-\`\`\`
+```
 
 No Cloudflare API token is needed for local quote calculations. Login might be required by Wrangler for some commands, but the local Worker itself does not depend on any paid service.
 
@@ -75,19 +75,19 @@ No Cloudflare API token is needed for local quote calculations. Login might be r
 | Cloudflare static assets | $0 within free limits |
 | Local estimates | $0 (browser storage) |
 | GitHub repo and public Actions | $0 under eligible free usage |
-| Domain | $0 (use \`.workers.dev\`) |
+| Domain | $0 (use `.workers.dev`) |
 | External pricing API, AI, database | None required |
 
 **Important:** no host can promise unconditional unlimited traffic at zero dollars. This design requires no paid tiers and is subject to provider quotas.
 
 ## Troubleshooting
 
-**The page loads but quoting fails:** Try \`/api/health\` and \`/api/catalog\`; deploy the current \`src/worker.js\` from GitHub's main branch. Ensure Wrangler uses the repository root.
+**The page loads but quoting fails:** Try `/api/health` and `/api/catalog`; deploy the current `src/worker.js` from GitHub's main branch. Ensure Wrangler uses the repository root.
 
 **GitHub deployment fails authentication:** Confirm both secrets and token permissions, and that the token belongs to the Cloudflare account ID supplied.
 
 **The UI shows no saved estimates after switching browsers:** Estimates live in **this browser's localStorage**. Export/import JSON if moving browsers or devices. Incognito profiles and cleared browser storage cannot be recovered.
 
-**Your old dashboard routes look broken:** v2 redirects the legacy HTML routes to the new workspace. Bookmark \`/\` and use the application navigation.
+**Your old dashboard routes look broken:** v2 redirects the legacy HTML routes to the new workspace. Bookmark `/` and use the application navigation.
 
 **You need live pricing, user accounts, or D1 storage:** Those are outside this honest, zero-cost restoration. Never imply a static planning model is live local market data.

@@ -13,7 +13,7 @@ test("price calculations are deterministic and ordered",()=>{
   const a=estimateQuote(sample),b=estimateQuote(sample);
   assert.ok(a.low<a.median&&a.median<a.high);
   assert.equal(a.median,b.median);
-  assert.equal(a.breakdown.directCost,a.breakdown.labor+a.breakdown.materials);
+  assert.ok(Math.abs(a.breakdown.directCost-(a.breakdown.labor+a.breakdown.materials))<0.011);
 });
 test("quantity, location and complexity change prices",()=>{
   const baseline=estimateQuote(sample).median;

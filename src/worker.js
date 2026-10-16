@@ -76,7 +76,7 @@ export function estimateQuote(input){
   const laborRate = round(category.rate * locationFactor);
   const estimatedHours = round(preset.hours * quantity * COMPLEXITY[complexity]);
   const labor = round(estimatedHours * laborRate * URGENCY[urgency]);
-  const materials = round((preset.material * quantity * (0.85+locationFactor*0.15)) + addedMaterials);
+  const materials = round((preset.materials * quantity * (0.85+locationFactor*0.15)) + addedMaterials);
   const directCost = round(labor + materials);
   const overhead = round(directCost * 0.18);
   const margin = round((directCost + overhead) * 0.12);

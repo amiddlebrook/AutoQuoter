@@ -2,9 +2,9 @@
 
 ## Observed in the original master branch
 
-- \`worker.js\` served assets only and had no \`/api/quote\` handler.
-- \`frontend/index.html\`, \`dashboard.html\` and \`market-trends.html\` made \`http://localhost:5000\` API requests. Browsers visiting a Cloudflare domain cannot reach another person's localhost Flask backend.
-- \`backend/app.py\` referenced \`pricing_engine\` without initialization; \`geo_pricing.py\` expected ML imports not present on the Flask module path without extra runtime manipulation.
+- `worker.js` served assets only and had no `/api/quote` handler.
+- `frontend/index.html`, `dashboard.html` and `market-trends.html` made `http://localhost:5000` API requests. Browsers visiting a Cloudflare domain cannot reach another person's localhost Flask backend.
+- `backend/app.py` referenced `pricing_engine` without initialization; `geo_pricing.py` expected ML imports not present on the Flask module path without extra runtime manipulation.
 - Dashboard statistics were random and activity/market trends were mock data. No data persistence strategy was actually wired.
 - The README claimed that integrations, “AI accuracy,” security compliance and external services were ready without evidence that production integration and deployment worked.
 
@@ -14,7 +14,7 @@
 - Six-trade job catalog with coarse state allowances, deterministic formula and explicit source disclaimers.
 - Quotes, status pipeline, insights and import/export run in browser localStorage.
 - Accessible, responsive UI redesign with no frontend framework/CDN or paid dependencies.
-- GitHub Actions PR validation and a protected deploy job on \`master\`.
+- GitHub Actions PR validation and a protected deploy job on `master`.
 - All legacy Python, Docker, n8n and ML sources are preserved for reference but are **not** represented as operational product features.
 
 ## Out of scope / next opportunities
