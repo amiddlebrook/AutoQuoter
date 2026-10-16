@@ -56,6 +56,8 @@ jobs:
             --data '{"trade":"hvac","task":"heatpump","state":"CO","quantity":1,"complexity":"standard","urgency":"flexible","addedMaterials":0}' \
             "$BASE_URL/api/quote" \
             | jq -e '.trade == "hvac" and .low < .median and .median < .high and .breakdown.materials > 0'
-          curl -fsSL --retry 6 --retry-all-errors --retry-delay 3 "$BASE_URL/" | grep -q 'Quote studio'
-          curl -fsSL --retry 6 --retry-all-errors --retry-delay 3 "$BASE_URL/app.js" | grep -q 'function renderResult'
+          curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 "$BASE_URL/" -o /tmp/autoquoter-index.html
+          grep -q 'Quote studio' /tmp/autoquoter-index.html
+          curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 "$BASE_URL/app.js" -o /tmp/autoquoter-app.js
+          grep -q 'function renderResult' /tmp/autoquoter-app.js
           echo "Live Cloudflare endpoints and frontend passed smoke checks."
