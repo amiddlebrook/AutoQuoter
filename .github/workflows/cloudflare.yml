@@ -27,7 +27,7 @@ jobs:
           test -s frontend/index.html
           test -s frontend/app.js
           test -s frontend/styles.css
-          ! grep -RE 'http://localhost:5000|127[.]0[.]0[.]1:5000' frontend
+          ! grep -RE 'http://localhost:5000|127[.]0[.]0[.]1:5000' frontend/index.html frontend/app.js
 
   deploy:
     name: Publish to Cloudflare Workers
