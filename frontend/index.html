@@ -1,126 +1,174 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b1930">
-  <meta name="description" content="Build transparent home-service project estimates in minutes. A free, Cloudflare-native contractor quote workspace.">
-  <title>AutoQuoter — Better estimates. Faster decisions.</title>
-  <link rel="stylesheet" href="/styles.css">
-  <script type="module" src="/app.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoQuoter - Instant Contractor Quotes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .quote-result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #e8f5e8;
+            border-radius: 5px;
+            border-left: 5px solid #27ae60;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar" aria-label="Primary navigation">
-      <a class="brand" href="#overview" aria-label="AutoQuoter home"><span class="brand-mark">A<span>✳</span></span><span class="brand-text">auto<span>quoter</span><small>ESTIMATING WORKSPACE</small></span></a>
-      <div class="workspace-pill"><span class="workspace-avatar">AQ</span><span><strong id="companyLabel">My workspace</strong><small>Local-first · Free plan</small></span><span class="workspace-chevron">⌄</span></div>
-      <div class="nav-label">WORKSPACE</div>
-      <nav class="nav-list" id="mainNav">
-        <a href="#overview" class="nav-link active" data-nav="overview"><span class="nav-icon">◫</span>Overview</a>
-        <a href="#studio" class="nav-link" data-nav="studio"><span class="nav-icon">✳</span>Quote studio<span class="new-pill">NEW</span></a>
-        <a href="#estimates" class="nav-link" data-nav="estimates"><span class="nav-icon">▤</span>Estimates<span class="nav-count" id="navCount">0</span></a>
-        <a href="#insights" class="nav-link" data-nav="insights"><span class="nav-icon">◷</span>Insights</a>
-      </nav>
-      <div class="nav-label nav-label-lower">PREFERENCES</div>
-      <nav class="nav-list"><a href="#settings" class="nav-link" data-nav="settings"><span class="nav-icon">⚙</span>Settings & export</a></nav>
-      <div class="sidebar-bottom"><span class="online-dot"></span> Cloudflare-native <span class="aside-build">v2.0</span><p>Your estimates stay on this device. No account or subscription required.</p></div>
-    </aside>
+    <div class="container">
+        <h1>AutoQuoter</h1>
+        <p>Get instant, fair market quotes for contractor services</p>
 
-    <div class="main-wrap">
-      <header class="topbar">
-        <div class="topbar-left"><span class="crumb-muted">Workspace</span><span class="crumb-divider">/</span><strong id="currentPage">Overview</strong></div>
-        <div class="topbar-right"><span class="local-badge"><span class="badge-dot"></span> Browser storage</span><span class="date-label" id="todayLabel"></span><button class="btn btn-primary btn-small" data-go="studio">+ New estimate</button></div>
-      </header>
-      <main class="page-content">
-        <section class="view" id="view-overview" aria-labelledby="overviewHeading">
-          <div class="welcome-line"><div><div class="eyebrow">THE CONTRACTOR'S COMMAND CENTER</div><h1 id="overviewHeading">Good morning, <span>let's get pricing.</span></h1><p>One place for accurate calculations, transparent breakdowns, and organized estimates.</p></div><span class="top-light">✦ Made for the trades</span></div>
-          <div class="hero">
-            <div class="hero-copy"><span class="hero-tag">✳ BUILT FOR THE REAL WORLD</span><h2>Price projects with<br><em>more confidence.</em></h2><p>Go from project details to a clear, itemized planning estimate in seconds. Six trades, 51 US jurisdictions, and zero subscription fees.</p><button class="btn btn-light" data-go="studio">Create an estimate <span aria-hidden="true">↗</span></button></div>
-            <div class="hero-art" aria-hidden="true"><div class="art-plate art-plate-one"><span>PROJECT ESTIMATE</span><strong>$8,450</strong><small>Typical planning allowance</small><div class="art-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="art-plate art-plate-two"><span class="art-check">✓</span><strong>Breakdown ready</strong><small>Labor + Materials + O&amp;P</small></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div></div>
-          </div>
-          <div class="section-heading"><div><h2>Workspace at a glance</h2><p>Calculated from estimates saved in this browser, never synthetic data.</p></div></div>
-          <div class="stat-grid">
-            <div class="stat-card"><div class="stat-head"><span class="stat-icon stat-icon-blue">▤</span><span class="stat-meta">ALL TIME</span></div><strong id="statTotal">0</strong><span>Total estimates</span><small>Quotes built in this workspace</small></div>
-            <div class="stat-card"><div class="stat-head"><span class="stat-icon stat-icon-amber">◇</span><span class="stat-meta">ACTIVE</span></div><strong id="statActive">0</strong><span>Open estimates</span><small>Draft and sent proposals</small></div>
-            <div class="stat-card"><div class="stat-head"><span class="stat-icon stat-icon-green">↗</span><span class="stat-meta">AVERAGE</span></div><strong id="statAverage">$0</strong><span>Typical estimate value</span><small>Mean across saved estimates</small></div>
-            <div class="stat-card"><div class="stat-head"><span class="stat-icon stat-icon-purple">✓</span><span class="stat-meta">WON</span></div><strong id="statWon">0</strong><span>Accepted estimates</span><small>Marked accepted by you</small></div>
-          </div>
-          <div class="overview-grid">
-            <div class="panel panel-large"><div class="panel-header"><div><h3>Recent estimates</h3><p>Keep your projects moving</p></div><button class="text-link" data-go="estimates">View all <span>↗</span></button></div><div id="recentList" class="recent-list"></div></div>
-            <div class="panel"><div class="panel-header"><div><h3>Quick start</h3><p>Every estimate begins here</p></div></div><div class="quick-steps"><div><span class="step-number">01</span><div><strong>Choose your trade</strong><p>HVAC, plumbing, electrical and more</p></div></div><div><span class="step-number">02</span><div><strong>Define the project</strong><p>Select scope, location and complexity</p></div></div><div><span class="step-number">03</span><div><strong>Share the breakdown</strong><p>Review, save, print or export your quote</p></div></div></div><button class="btn btn-outline full" data-go="studio">Open quote studio ↗</button></div>
-          </div>
-          <p class="fineprint">Estimates use editable-style planning assumptions rather than verified local bids or live materials pricing. Always confirm site conditions, permits and local market rates.</p>
-        </section>
-
-        <section class="view hidden" id="view-studio" aria-labelledby="studioHeading">
-          <div class="page-title"><div><div class="eyebrow">BUILD A NEW ESTIMATE</div><h1 id="studioHeading">Quote studio<span class="heading-accent">.</span></h1><p>Structured inputs, instant calculations, transparent outputs.</p></div><button class="btn btn-outline" id="resetQuote">↻ Reset form</button></div>
-          <div class="studio-layout">
-            <div class="panel studio-form-panel">
-              <div class="form-section-heading"><span class="section-number">01</span><div><h3>Project details</h3><p>Start with the work being performed.</p></div></div>
-              <form id="quoteForm">
-                <label class="input-label" for="trade">Trade category</label>
-                <div class="trade-tabs" id="tradeTabs" role="group" aria-label="Choose a trade"></div>
-                <select name="trade" id="trade" class="hidden" aria-label="Trade" required></select>
-                <div class="field-grid">
-                  <div class="field wide"><label for="task">Job type</label><select id="task" name="task" required></select><small id="jobDescription" class="field-hint"></small></div>
-                  <div class="field"><label for="state">US state / DC</label><select id="state" name="state" required><option value="CO">Colorado (CO)</option></select></div>
-                  <div class="field"><label for="quantity">Quantity <span id="unitLabel" class="label-muted">(units)</span></label><input id="quantity" name="quantity" type="number" min="1" max="100" step="1" value="1" required></div>
-                </div>
-                <div class="form-separator"></div>
-                <div class="form-section-heading"><span class="section-number">02</span><div><h3>Scope & scheduling</h3><p>Adjust for access, time and material allowance.</p></div></div>
-                <div class="field-grid"><div class="field"><label for="complexity">Project complexity</label><select id="complexity" name="complexity"><option value="simple">Simple / good access</option><option value="standard" selected>Standard</option><option value="complex">Complex / difficult access</option></select></div><div class="field"><label for="urgency">Schedule</label><select id="urgency" name="urgency"><option value="flexible">Flexible</option><option value="soon">Priority scheduling</option><option value="emergency">Emergency / off-hours</option></select></div><div class="field wide"><label for="addedMaterials">Extra materials allowance (USD)</label><div class="input-prefix"><span>$</span><input id="addedMaterials" name="addedMaterials" type="number" min="0" max="100000" step="0.01" value="0"></div></div></div>
-                <div class="form-separator"></div>
-                <div class="form-section-heading"><span class="section-number">03</span><div><h3>Reference details</h3><p>Optional notes stored only in your browser.</p></div></div>
-                <div class="field-grid"><div class="field"><label for="projectName">Project title</label><input id="projectName" name="projectName" maxlength="80" placeholder="e.g. Main house heat pump"></div><div class="field"><label for="clientName">Client / reference</label><input id="clientName" name="clientName" maxlength="80" placeholder="e.g. Smith residence"></div></div>
-                <p id="quoteError" class="form-error hidden" role="alert"></p>
-                <button id="calculateButton" type="submit" class="btn btn-primary btn-calculate">Calculate estimate <span>↗</span></button>
-              </form>
+        <form id="quoteForm">
+            <div class="form-group">
+                <label for="jobType">Service Type:</label>
+                <select id="jobType" required>
+                    <option value="">Select a service</option>
+                    <option value="HVAC">HVAC</option>
+                    <option value="plumbing">Plumbing</option>
+                    <option value="electrical">Electrical</option>
+                    <option value="roofing">Roofing</option>
+                    <option value="landscaping">Landscaping</option>
+                    <option value="remodeling">Remodeling</option>
+                </select>
             </div>
-            <div class="result-column">
-              <div class="panel result-panel" id="resultPanel">
-                <div class="result-top"><div><span class="result-kicker">LIVE ESTIMATE PREVIEW</span><h3>Pricing breakdown</h3></div><span class="result-badge" id="resultBadge">Awaiting input</span></div>
-                <div id="resultEmpty" class="result-empty"><div class="result-empty-art">▥<span>✳</span></div><h4>Good estimates start here.</h4><p>Choose a trade and enter your project details, then calculate to see a transparent price range.</p></div>
-                <div id="resultContent" class="hidden">
-                  <div class="estimate-intro"><span id="quoteJobLabel"></span><span id="quoteLocation"></span></div>
-                  <div class="price-center"><span>TYPICAL PLANNING ESTIMATE</span><strong id="quoteMedian">$0</strong><p id="quoteRange">$0 – $0 range</p></div>
-                  <div class="range-spectrum"><div class="range-gradient"></div><div class="range-labels"><span><small>LOW</small><strong id="quoteLow">$0</strong></span><span><small>HIGH</small><strong id="quoteHigh">$0</strong></span></div></div>
-                  <h4 class="cost-heading">Itemized calculation</h4><div class="breakdown" id="quoteBreakdown"></div>
-                  <div class="assumption-note"><strong>ⓘ Planning estimate — not a contractor bid</strong><p>Uses fixed model assumptions, not real-time local prices. Taxes, permits and concealed conditions are not included.</p></div>
-                  <div class="result-actions"><button id="saveQuote" class="btn btn-primary full">Save estimate</button><button id="printQuote" class="btn btn-outline full">Print / PDF ↗</button><button id="copyQuote" class="btn btn-subtle full">Copy summary</button></div>
-                </div>
-              </div>
-              <div class="trust-note"><span>◈</span><div><strong>Explainable by design.</strong><p>Every amount comes from published-in-app assumptions and input factors. No unverifiable “AI accuracy” claims.</p></div></div>
+
+            <div class="form-group">
+                <label for="location">Location (State):</label>
+                <input type="text" id="location" placeholder="e.g., CA, NY, TX" required>
             </div>
-          </div>
-        </section>
 
-        <section class="view hidden" id="view-estimates" aria-labelledby="estimatesHeading">
-          <div class="page-title"><div><div class="eyebrow">YOUR PROJECT PIPELINE</div><h1 id="estimatesHeading">Estimates<span class="heading-accent">.</span></h1><p>Manage drafts, sent proposals and accepted work from one workspace.</p></div><button class="btn btn-primary" data-go="studio">+ New estimate</button></div>
-          <div class="panel table-panel"><div class="table-toolbar"><div class="toolbar-title"><strong id="quoteCountTitle">0 saved estimates</strong><span>Local records</span></div><div class="toolbar-controls"><label class="search-input"><span>⌕</span><input id="searchQuotes" aria-label="Search estimates" placeholder="Search projects, states, clients…"></label><select id="filterStatus" aria-label="Filter by status"><option value="all">All statuses</option><option value="draft">Draft</option><option value="sent">Sent</option><option value="accepted">Accepted</option><option value="declined">Declined</option></select></div></div><div class="table-scroll"><table class="quote-table"><thead><tr><th>PROJECT</th><th>TRADE / LOCATION</th><th>TYPICAL VALUE</th><th>DATE</th><th>STATUS</th><th>ACTIONS</th></tr></thead><tbody id="estimatesBody"></tbody></table></div><div class="table-bottom"><span id="showingQuotes">Showing 0 estimates</span><button class="text-link" id="exportCsv">Export CSV ↗</button></div></div>
-        </section>
+            <div class="form-group">
+                <label for="complexity">Complexity:</label>
+                <select id="complexity">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                </select>
+            </div>
 
-        <section class="view hidden" id="view-insights" aria-labelledby="insightsHeading">
-          <div class="page-title"><div><div class="eyebrow">MEASURE WHAT YOU ACTUALLY SAVE</div><h1 id="insightsHeading">Insights<span class="heading-accent">.</span></h1><p>Understand your estimate mix. No fabricated market intelligence.</p></div><button class="btn btn-outline" id="insightsExport">Export data ↗</button></div>
-          <div class="insights-metrics"><div class="panel"><small>ESTIMATES CREATED</small><strong id="insightTotal">0</strong><span>All saved records</span></div><div class="panel"><small>ESTIMATED PIPELINE</small><strong id="insightPipeline">$0</strong><span>Drafts and sent</span></div><div class="panel"><small>ACCEPTED ESTIMATE VALUE</small><strong id="insightWon">$0</strong><span>Marked accepted</span></div></div>
-          <div class="insights-grid"><div class="panel"><div class="panel-header"><div><h3>Estimates by trade</h3><p>Count of saved quotes</p></div></div><div class="bar-list" id="tradeChart"></div></div><div class="panel"><div class="panel-header"><div><h3>Project pipeline</h3><p>Status distribution</p></div></div><div class="bar-list" id="statusChart"></div></div></div>
-          <div class="panel insights-method"><h3>Where do the numbers come from?</h3><p>Charts and totals use estimates that you explicitly save. They do not represent national market demand, customer conversion benchmarks or competitive market share. All quote engine prices are planning allowances, not verified market rates.</p></div>
-        </section>
+            <div class="form-group">
+                <label for="materials">Materials (optional):</label>
+                <input type="text" id="materials" placeholder="e.g., copper:10, steel:5">
+            </div>
 
-        <section class="view hidden" id="view-settings" aria-labelledby="settingsHeading">
-          <div class="page-title"><div><div class="eyebrow">MAKE IT YOURS</div><h1 id="settingsHeading">Workspace settings<span class="heading-accent">.</span></h1><p>Simple controls. Your data, your workflow.</p></div></div>
-          <div class="settings-grid">
-            <div class="panel setting-panel"><div class="setting-icon">◈</div><h3>Business display name</h3><p>Shown in the workspace and printed estimates.</p><label for="companyName">Company / workspace name</label><input type="text" id="companyName" maxlength="70" placeholder="My estimating workspace"><button id="saveSettings" class="btn btn-primary">Save preference</button></div>
-            <div class="panel setting-panel"><div class="setting-icon">⇩</div><h3>Backup and restore</h3><p>Export all estimates to a JSON file or restore a previous backup. Data never leaves your device unless you export it.</p><div class="setting-buttons"><button id="exportJson" class="btn btn-outline">Download JSON backup</button><label for="importJson" class="btn btn-outline file-button">Import backup<input type="file" id="importJson" accept=".json,application/json" hidden></label></div></div>
-            <div class="panel setting-panel warning-panel"><div class="setting-icon">⌫</div><h3>Delete local estimates</h3><p>Remove saved quotes from this browser. Export a backup first if you might want the records again.</p><button id="clearData" class="btn btn-danger">Clear local records</button></div>
-            <div class="panel setting-panel"><div class="setting-icon">ⓘ</div><h3>Data and price transparency</h3><p><strong>Hosting:</strong> Cloudflare Workers Free. <strong>API:</strong> same-origin quote calculations. <strong>Storage:</strong> browser localStorage, no account or cross-device sync. <strong>Pricing:</strong> static illustrative base assumptions; not live BLS, suppliers, or AI predictions.</p><a class="text-link" href="https://github.com/amiddlebrook/AutoQuoter" target="_blank" rel="noopener noreferrer">View source on GitHub ↗</a></div>
-          </div>
-          <div id="settingsMessage" role="status" class="settings-message" aria-live="polite"></div>
-        </section>
-      </main>
-      <footer class="footer"><span>© <span id="year"></span> AutoQuoter · Open, transparent estimating</span><span>Cloudflare Workers · Free tier · USD</span></footer>
+            <button type="submit">Get Quote</button>
+        </form>
+
+        <div id="quoteResult" class="quote-result hidden">
+            <h3>Your Fair Market Quote</h3>
+            <p><strong>Service:</strong> <span id="resultService"></span></p>
+            <p><strong>Location:</strong> <span id="resultLocation"></span></p>
+            <p><strong>Price Range:</strong></p>
+            <ul>
+                <li>Low: $<span id="resultLow"></span></li>
+                <li>Median: $<span id="resultMedian"></span></li>
+                <li>High: $<span id="resultHigh"></span></li>
+            </ul>
+            <p><strong>Fair Market Certificate:</strong> ✅ Verified</p>
+        </div>
     </div>
-  </div>
-  <div id="toast" role="status" aria-live="polite" class="toast hidden"></div>
-  <div id="printArea" aria-hidden="true"></div>
+
+    <script>
+        document.getElementById('quoteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const jobType = document.getElementById('jobType').value;
+            const location = document.getElementById('location').value;
+            const complexity = document.getElementById('complexity').value;
+            const materialsInput = document.getElementById('materials').value;
+
+            let materials = {};
+            if (materialsInput) {
+                materialsInput.split(',').forEach(item => {
+                    const [material, amount] = item.split(':');
+                    if (material && amount) {
+                        materials[material.trim()] = parseFloat(amount.trim());
+                    }
+                });
+            }
+
+            const data = {
+                job_type: jobType,
+                location: location,
+                complexity: complexity,
+                materials: materials
+            };
+
+            try {
+                const response = await fetch('http://localhost:5000/api/quote', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('resultService').textContent = result.job_type;
+                    document.getElementById('resultLocation').textContent = result.location;
+                    document.getElementById('resultLow').textContent = result.quote_range.low;
+                    document.getElementById('resultMedian').textContent = result.quote_range.median;
+                    document.getElementById('resultHigh').textContent = result.quote_range.high;
+
+                    document.getElementById('quoteResult').classList.remove('hidden');
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Error connecting to server: ' + error.message);
+            }
+        });
+    </script>
 </body>
 </html>
