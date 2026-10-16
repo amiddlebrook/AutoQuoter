@@ -42,3 +42,20 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           wranglerVersion: '4'
           command: deploy
+      - name: Smoke test live Workers deployment
+        env:
+          BASE_URL: https://autoquoter.averymiddlebrook2014.workers.dev
+        run: |
+          set -euo pipefail
+          curl -fsSL --retry 6 --retry-all-errors --retry-delay 3 "$BASE_URL/api/health" \
+            | jq -e '.status == "ok" and .engine == "cloudflare-worker"'
+          curl -fsSL --retry 6 --retry-all-errors --retry-delay 3 "$BASE_URL/api/catalog" \
+            | jq -e '.catalog.hvac.presets.heatpump.label != null and (.states | length) == 51'
+          curl -fsSL --retry 6 --retry-all-errors --retry-delay 3 \
+            -H 'Content-Type: application/json' \
+            --data '{"trade":"hvac","task":"heatpump","state":"CO","quantity":1,"complexity":"standard","urgency":"flexible","addedMaterials":0}' \
+            "$BASE_URL/api/quote" \
+            | jq -e '.trade == "hvac" and .low < .median and .median < .high and .breakdown.materials > 0'
+          curl -fsSL --retry 6 --retry-all-errors --retry-delay 3 "$BASE_URL/" | grep -q 'Quote studio'
+          curl -fsSL --retry 6 --retry-all-errors --retry-delay 3 "$BASE_URL/app.js" | grep -q 'function renderResult'
+          echo "Live Cloudflare endpoints and frontend passed smoke checks."
