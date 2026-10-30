@@ -75,6 +75,50 @@ function updateJob(){
   const trade=$("#trade").value,task=$("#task").value,job=catalog[trade]?.presets?.[task];
   $("#jobDescription").textContent=job?.description||"";
   $("#unitLabel").textContent=job?"("+job.unit+")":"(units)";
+  loadSavedPricing();
+}
+const PRICE_FIELDS={hoursPerUnit:"#customHours",laborRate:"#customRate",materialsPerUnit:"#customMaterials",overheadPercent:"#customOverhead",profitMarkupPercent:"#customMarkup"};
+const PRICE_BOUNDS={hoursPerUnit:[0.1,2000],laborRate:[0,10000],materialsPerUnit:[0,1000000],overheadPercent:[0,100],profitMarkupPercent:[0,200]};
+function pricingKey(){return $("#trade").value+":"+$("#task").value;}
+function togglePricing(){
+  $("#customPricingFields").classList.toggle("hidden",!$("#useCustomRates").checked);
+}
+function loadSavedPricing(){
+  const saved=settings.pricebook?.[pricingKey()];
+  const fields=Object.values(PRICE_FIELDS);
+  $("#useCustomRates").checked=Boolean(saved);
+  fields.forEach(selector=>{$(selector).value="";});
+  $("#customOverhead").value=saved?.overheadPercent??18;
+  $("#customMarkup").value=saved?.profitMarkupPercent??12;
+  if(saved && typeof saved==="object")for(const [field,selector] of Object.entries(PRICE_FIELDS)){
+    if(typeof saved[field]==="number")$(selector).value=String(saved[field]);
+  }
+  togglePricing();
+}
+function readCustomPricing(){
+  if(!$("#useCustomRates").checked)return null;
+  const data={};
+  for(const [field,selector] of Object.entries(PRICE_FIELDS)){
+    const raw=$(selector).value.trim(),num=Number(raw),[min,max]=PRICE_BOUNDS[field];
+    if(raw===""||!Number.isFinite(num)||num<min||num>max)throw Error("Enter a valid "+field+" between "+min+" and "+max);
+    data[field]=num;
+  }
+  return data;
+}
+function saveJobPricing(){
+  try{
+    const pricing=readCustomPricing();
+    if(!pricing)throw Error("Enable custom pricing first");
+    if(!settings.pricebook||typeof settings.pricebook!=="object"||Array.isArray(settings.pricebook))settings.pricebook={};
+    settings.pricebook[pricingKey()]=pricing;
+    localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));
+    toast("Rates saved in this browser for this job.");
+  }catch(error){toast(error.message);}
+}
+function clearJobPricing(){
+  if(settings.pricebook)delete settings.pricebook[pricingKey()];
+  try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));}catch{toast("Browser storage is unavailable.");return;}
+  loadSavedPricing();toast("Saved rates cleared for this job.");
 }
 function renderResult(q){
   $("#resultEmpty").classList.add("hidden");$("#resultContent").classList.remove("hidden");
@@ -82,12 +126,15 @@ function renderResult(q){
   $("#quoteJobLabel").textContent=q.taskLabel;$("#quoteLocation").textContent=(STATE_NAMES[q.state]||q.state)+" · "+q.quantity+" "+q.unit;
   $("#quoteMedian").textContent=money(q.median);$("#quoteLow").textContent=money(q.low);$("#quoteHigh").textContent=money(q.high);
   $("#quoteRange").textContent=money(q.low)+" – "+money(q.high)+" planning range";
+  $("#pricingDisclosure").textContent=q.pricingSource==="contractor-entered"?
+    "Calculated using your entered job rates and allowances, not independently verified. The low/high band is subjective, not a confidence interval. Validate taxes, permits and site conditions.":
+    "Calculated with illustrative assumptions, not verified local pricing. The low/high band is subjective. Validate taxes, permits and site conditions.";
   const b=q.breakdown;
   const rows=[
     ["Labor ("+b.hours+" hrs × "+money(b.hourlyRate)+"/hr)",b.labor],
     ["Materials and allowance",b.materials],
-    ["Overhead (18%)",b.overhead],
-    ["Profit allowance (12%)",b.margin]
+    ["Overhead ("+(b.overheadPercent??18)+"%)",b.overhead],
+    ["Profit markup ("+(b.profitMarkupPercent??12)+"%)",b.margin]
   ];
   const wrap=$("#quoteBreakdown");wrap.replaceChildren();
   rows.forEach(([label,value])=>{const row=document.createElement("div");row.className="cost-row";const l=document.createElement("span"),r=document.createElement("strong");l.textContent=label;r.textContent=money(value);row.append(l,r);wrap.append(row);});
@@ -104,6 +151,8 @@ async function calculate(event){
   };
   const button=$("#calculateButton");button.disabled=true;button.textContent="Calculating…";
   try{
+    const pricing=readCustomPricing();
+    if(pricing)data.pricing=pricing;
     const response=await fetch("/api/quote",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(data)});
     const result=await response.json();
     if(!response.ok)throw Error(result.error||"Unable to calculate estimate");
@@ -185,7 +234,7 @@ function renderInsights(){
 function printQuote(q){
   if(!q){toast("Calculate an estimate first.");return;}
   const b=q.breakdown;
-  const rows=[["Labor",b.labor],["Materials",b.materials],["Overhead",b.overhead],["Profit allowance",b.margin],["Typical total",q.median]];
+  const rows=[["Labor",b.labor],["Materials",b.materials],["Overhead",b.overhead],["Profit markup",b.margin],["Typical total",q.median]];
   $("#printArea").innerHTML="<div class='print-band'><h1>"+escapeHtml(settings.companyName||"AutoQuoter")+"</h1><div>Planning estimate · "+escapeHtml(fmtDate(q.createdAt))+"</div></div>"+
     "<h2>"+escapeHtml(q.projectName||q.taskLabel)+"</h2><p>"+escapeHtml(q.clientName||"")+"</p>"+
     "<p>"+escapeHtml(q.tradeLabel)+" · "+escapeHtml(q.taskLabel)+" · "+escapeHtml(STATE_NAMES[q.state]||q.state)+" · "+escapeHtml(q.quantity)+" "+escapeHtml(q.unit)+"</p>"+
@@ -202,7 +251,8 @@ function quoteText(q){
     "Typical estimate: "+money(q.median),
     "Planning range: "+money(q.low)+" to "+money(q.high),
     "Labor: "+money(b.labor)+"; Materials: "+money(b.materials),
-    "Overhead: "+money(b.overhead)+"; Profit: "+money(b.margin),
+    "Overhead: "+money(b.overhead)+"; Profit markup: "+money(b.margin),
+    "Pricing source: "+(q.pricingSource==="contractor-entered"?"contractor-entered inputs":"illustrative assumptions"),
     q.disclaimer
   ].join("\n");
 }
@@ -270,6 +320,9 @@ function wireEvents(){
     activeQuote=null;$("#resultContent").classList.add("hidden");$("#resultEmpty").classList.remove("hidden");$("#resultBadge").classList.remove("ready");$("#resultBadge").textContent="Awaiting input";toast("Quote form reset.");
   });
   $("#saveQuote").addEventListener("click",saveActive);
+  $("#useCustomRates").addEventListener("change",togglePricing);
+  $("#savePricebook").addEventListener("click",saveJobPricing);
+  $("#clearPricebook").addEventListener("click",clearJobPricing);
   $("#printQuote").addEventListener("click",()=>printQuote(activeQuote));
   $("#copyQuote").addEventListener("click",()=>copySummary(activeQuote));
   $("#searchQuotes").addEventListener("input",renderEstimates);

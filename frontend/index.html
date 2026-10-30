@@ -4,10 +4,15 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b1930">
-  <meta name="description" content="Build transparent home-service project estimates in minutes. A free, Cloudflare-native contractor quote workspace.">
-  <title>AutoQuoter — Better estimates. Faster decisions.</title>
+  <meta name="description" content="Free contractor estimate calculator with optional custom labor rates, material costs and profit markup. No account or monthly charge.">
+  <link rel="canonical" href="https://autoquoter.averymiddlebrook2014.workers.dev/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AutoQuoter | Free contractor job estimator">
+  <meta property="og:description" content="Free contractor estimate calculator with your own labor rates, materials and markup. Planning tool, not certified bids.">
+  <title>Free Contractor Estimate Calculator — AutoQuoter</title>
   <link rel="stylesheet" href="/styles.css">
   <script type="module" src="/app.js"></script>
+  <style>.pricing-switch{display:flex;align-items:center;gap:10px;margin-bottom:18px;color:#20384f;font-size:15px}.pricing-switch input{width:19px;height:19px}.pricing-buttons{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}.marketing-links{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 20px;font-size:12px}.marketing-links a{color:#087c7b;text-decoration:underline}.marketing-links a:focus-visible{outline:3px solid #12bca8}</style>
 </head>
 <body>
   <div class="app-shell">
@@ -23,6 +28,7 @@
       </nav>
       <div class="nav-label nav-label-lower">PREFERENCES</div>
       <nav class="nav-list"><a href="#settings" class="nav-link" data-nav="settings"><span class="nav-icon">⚙</span>Settings & export</a></nav>
+      <div class="marketing-links"><a href="/pricing-guide.html">Pricing guide</a><a href="/custom-setup.html">Custom setup</a><a href="/demo.html">Watch tutorial</a></div>
       <div class="sidebar-bottom"><span class="online-dot"></span> Cloudflare-native <span class="aside-build">v2.0</span><p>Your estimates stay on this device. No account or subscription required.</p></div>
     </aside>
 
@@ -49,7 +55,7 @@
             <div class="panel panel-large"><div class="panel-header"><div><h3>Recent estimates</h3><p>Keep your projects moving</p></div><button class="text-link" data-go="estimates">View all <span>↗</span></button></div><div id="recentList" class="recent-list"></div></div>
             <div class="panel"><div class="panel-header"><div><h3>Quick start</h3><p>Every estimate begins here</p></div></div><div class="quick-steps"><div><span class="step-number">01</span><div><strong>Choose your trade</strong><p>HVAC, plumbing, electrical and more</p></div></div><div><span class="step-number">02</span><div><strong>Define the project</strong><p>Select scope, location and complexity</p></div></div><div><span class="step-number">03</span><div><strong>Share the breakdown</strong><p>Review, save, print or export your quote</p></div></div></div><button class="btn btn-outline full" data-go="studio">Open quote studio ↗</button></div>
           </div>
-          <p class="fineprint">Estimates use editable-style planning assumptions rather than verified local bids or live materials pricing. Always confirm site conditions, permits and local market rates.</p>
+          <p class="fineprint">Estimates use illustrative assumptions unless you enter and verify your own pricing. They are never independently verified market bids. Always confirm site conditions, permits and local market rates.</p>
         </section>
 
         <section class="view hidden" id="view-studio" aria-labelledby="studioHeading">
@@ -70,7 +76,23 @@
                 <div class="form-section-heading"><span class="section-number">02</span><div><h3>Scope & scheduling</h3><p>Adjust for access, time and material allowance.</p></div></div>
                 <div class="field-grid"><div class="field"><label for="complexity">Project complexity</label><select id="complexity" name="complexity"><option value="simple">Simple / good access</option><option value="standard" selected>Standard</option><option value="complex">Complex / difficult access</option></select></div><div class="field"><label for="urgency">Schedule</label><select id="urgency" name="urgency"><option value="flexible">Flexible</option><option value="soon">Priority scheduling</option><option value="emergency">Emergency / off-hours</option></select></div><div class="field wide"><label for="addedMaterials">Extra materials allowance (USD)</label><div class="input-prefix"><span>$</span><input id="addedMaterials" name="addedMaterials" type="number" min="0" max="100000" step="0.01" value="0"></div></div></div>
                 <div class="form-separator"></div>
-                <div class="form-section-heading"><span class="section-number">03</span><div><h3>Reference details</h3><p>Optional notes stored only in your browser.</p></div></div>
+                <div class="form-separator"></div>
+                <div class="form-section-heading"><span class="section-number">03</span><div><h3>Your pricebook (optional)</h3><p>Use your own verified numbers instead of sample allowances. Saved privately on this device.</p></div></div>
+                <label class="pricing-switch"><input id="useCustomRates" type="checkbox"> <strong>Calculate using my rates and costs</strong></label>
+                <div id="customPricingFields" class="hidden">
+                  <p class="fineprint">These entries replace illustrative labor hours, hourly rates and material costs. State multipliers are not applied to your custom rates; complexity and urgency still adjust labor. You are responsible for checking each input.</p>
+                  <div class="field-grid">
+                    <div class="field"><label for="customHours">Hours per unit</label><input id="customHours" type="number" min="0.1" max="2000" step="0.1" inputmode="decimal" placeholder="e.g. 12"></div>
+                    <div class="field"><label for="customRate">Labor rate / hour ($)</label><input id="customRate" type="number" min="0" max="10000" step="0.01" inputmode="decimal" placeholder="e.g. 110"></div>
+                    <div class="field"><label for="customMaterials">Materials / unit ($)</label><input id="customMaterials" type="number" min="0" max="1000000" step="0.01" inputmode="decimal" placeholder="e.g. 1500"></div>
+                    <div class="field"><label for="customOverhead">Overhead (% of direct cost)</label><input id="customOverhead" type="number" min="0" max="100" step="0.1" inputmode="decimal" value="18"></div>
+                    <div class="field"><label for="customMarkup">Profit markup (% of cost + overhead)</label><input id="customMarkup" type="number" min="0" max="200" step="0.1" inputmode="decimal" value="12"></div>
+                  </div>
+                  <div class="pricing-buttons"><button id="savePricebook" type="button" class="btn btn-outline">Save this job's rates</button> <button id="clearPricebook" type="button" class="btn btn-subtle">Clear saved rates</button></div>
+                  <p class="field-hint">Saved rates belong to this trade and job only. They can be overwritten, deleted or exported with your workspace settings.</p>
+                </div>
+                <div class="form-separator"></div>
+                <div class="form-section-heading"><span class="section-number">04</span><div><h3>Reference details</h3><p>Optional notes stored only in your browser.</p></div></div>
                 <div class="field-grid"><div class="field"><label for="projectName">Project title</label><input id="projectName" name="projectName" maxlength="80" placeholder="e.g. Main house heat pump"></div><div class="field"><label for="clientName">Client / reference</label><input id="clientName" name="clientName" maxlength="80" placeholder="e.g. Smith residence"></div></div>
                 <p id="quoteError" class="form-error hidden" role="alert"></p>
                 <button id="calculateButton" type="submit" class="btn btn-primary btn-calculate">Calculate estimate <span>↗</span></button>
@@ -85,7 +107,7 @@
                   <div class="price-center"><span>TYPICAL PLANNING ESTIMATE</span><strong id="quoteMedian">$0</strong><p id="quoteRange">$0 – $0 range</p></div>
                   <div class="range-spectrum"><div class="range-gradient"></div><div class="range-labels"><span><small>LOW</small><strong id="quoteLow">$0</strong></span><span><small>HIGH</small><strong id="quoteHigh">$0</strong></span></div></div>
                   <h4 class="cost-heading">Itemized calculation</h4><div class="breakdown" id="quoteBreakdown"></div>
-                  <div class="assumption-note"><strong>ⓘ Planning estimate — not a contractor bid</strong><p>Uses fixed model assumptions, not real-time local prices. Taxes, permits and concealed conditions are not included.</p></div>
+                  <div class="assumption-note"><strong>ⓘ Planning estimate — not a contractor bid</strong><p id="pricingDisclosure">Uses illustrative assumptions, not real-time local prices. Taxes, permits and concealed conditions are not included.</p></div>
                   <div class="result-actions"><button id="saveQuote" class="btn btn-primary full">Save estimate</button><button id="printQuote" class="btn btn-outline full">Print / PDF ↗</button><button id="copyQuote" class="btn btn-subtle full">Copy summary</button></div>
                 </div>
               </div>

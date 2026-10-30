@@ -72,23 +72,44 @@ export function estimateQuote(input){
   if(!Object.hasOwn(URGENCY,urgency)) throw new QuoteError("Invalid schedule");
   const quantity = numberInRange(input.quantity ?? 1,1,100,"Quantity",true);
   const addedMaterials = numberInRange(input.addedMaterials ?? 0,0,100000,"Additional materials");
+  // A priced job can use explicitly supplied contractor inputs. No market-rate claims.
+  // The API does not persist either these values or customer-identifying details.
+  const custom = input.pricing;
+  if (custom !== undefined) {
+    if (!isObject(custom)) throw new QuoteError("Pricing must be an object");
+    const fields=["hoursPerUnit","laborRate","materialsPerUnit","overheadPercent","profitMarkupPercent"];
+    if (Object.keys(custom).length!==fields.length||fields.some(field=>!Object.hasOwn(custom,field))) {
+      throw new QuoteError("Complete all five custom pricing fields");
+    }
+    numberInRange(custom.hoursPerUnit,0.1,2000,"Labor hours per unit");
+    numberInRange(custom.laborRate,0,10000,"Hourly labor rate");
+    numberInRange(custom.materialsPerUnit,0,1000000,"Materials per unit");
+    numberInRange(custom.overheadPercent,0,100,"Overhead percent");
+    numberInRange(custom.profitMarkupPercent,0,200,"Profit markup percent");
+  }
   const locationFactor = STATE_INDEX[state];
-  const laborRate = round(category.rate * locationFactor);
-  const estimatedHours = round(preset.hours * quantity * COMPLEXITY[complexity]);
+  const laborRate = round(custom ? custom.laborRate : category.rate * locationFactor);
+  const estimatedHours = round((custom ? custom.hoursPerUnit : preset.hours) * quantity * COMPLEXITY[complexity]);
   const labor = round(estimatedHours * laborRate * URGENCY[urgency]);
-  const materials = round((preset.materials * quantity * (0.85+locationFactor*0.15)) + addedMaterials);
+  const materials = round((custom ? custom.materialsPerUnit * quantity : preset.materials * quantity * (0.85+locationFactor*0.15)) + addedMaterials);
   const directCost = round(labor + materials);
-  const overhead = round(directCost * 0.18);
-  const margin = round((directCost + overhead) * 0.12);
+  const overheadPercent = custom ? custom.overheadPercent : 18;
+  const profitMarkupPercent = custom ? custom.profitMarkupPercent : 12;
+  const overhead = round(directCost * overheadPercent / 100);
+  const margin = round((directCost + overhead) * profitMarkupPercent / 100);
   const typical = round(directCost + overhead + margin);
   return {
-    id:crypto.randomUUID(),createdAt:new Date().toISOString(),model:"assumption-based-v1",
+    id:crypto.randomUUID(),createdAt:new Date().toISOString(),
+    model:custom?"contractor-entered-v1":"assumption-based-v1",
+    pricingSource:custom?"contractor-entered":"illustrative",
     trade,tradeLabel:category.label,task,taskLabel:preset.label,state,quantity,unit:preset.unit,
     complexity,urgency,addedMaterials,
     low:Math.round(typical*0.78),median:Math.round(typical),high:Math.round(typical*1.28),
-    breakdown:{hours:estimatedHours,hourlyRate:laborRate,labor,materials,directCost,overhead,margin},
-    methodology:"Illustrative labor and material allowances, coarse state multiplier, complexity and scheduling factors, plus 18% overhead and 12% profit allowance. Low/high is a planning range of -22%/+28%.",
-    disclaimer:"Planning estimate only. Not a bid, verified market price, live wage index, or fair-market certification. No taxes, permits, specialty equipment, hidden conditions or site inspection."
+    breakdown:{hours:estimatedHours,hourlyRate:laborRate,labor,materials,directCost,overhead,margin,overheadPercent,profitMarkupPercent},
+    methodology:custom?
+      "Contractor-entered hours, hourly rate and material allowance; chosen complexity and urgency; contractor-entered overhead and markup. Low/high is a subjective -22%/+28% planning range, not statistical confidence.":
+      "Illustrative labor and material allowances, coarse state multiplier, complexity and scheduling factors, plus 18% overhead and 12% cost-based profit markup. Low/high is a subjective planning range of -22%/+28%.",
+    disclaimer:"Planning estimate only. Not a binding bid, verified local market price, live wage index, or fair-market certification. No taxes, permits, specialty equipment, hidden conditions or site inspection. Validate before giving a customer a price."
   };
 }
 const json = (data,status=200,headers={}) => new Response(JSON.stringify(data),{status,headers:{
@@ -108,7 +129,7 @@ export default {
     const url=new URL(request.url);
     try {
       if(url.pathname.startsWith("/api/")){
-        if(request.method==="GET" && url.pathname==="/api/health")return json({status:"ok",engine:"cloudflare-worker",dataSource:"illustrative planning assumptions"});
+        if(request.method==="GET" && url.pathname==="/api/health")return json({status:"ok",engine:"cloudflare-worker",dataSource:"illustrative or contractor-entered inputs; no verified market pricing"});
         if(request.method==="GET" && url.pathname==="/api/catalog")return json({catalog:CATALOG,states:Object.keys(STATE_INDEX).sort()});
         if(url.pathname==="/api/quote"){
           if(request.method!=="POST")return json({error:"Method not allowed"},405,{allow:"POST"});
