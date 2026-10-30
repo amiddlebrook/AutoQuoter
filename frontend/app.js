@@ -317,6 +317,7 @@ function wireEvents(){
   $("#task").addEventListener("change",updateJob);
   $("#resetQuote").addEventListener("click",()=>{
     $("#quoteForm").reset();selectTrade("hvac");$("#quoteError").classList.add("hidden");
+    loadSavedPricing();
     activeQuote=null;$("#resultContent").classList.add("hidden");$("#resultEmpty").classList.remove("hidden");$("#resultBadge").classList.remove("ready");$("#resultBadge").textContent="Awaiting input";toast("Quote form reset.");
   });
   $("#saveQuote").addEventListener("click",saveActive);

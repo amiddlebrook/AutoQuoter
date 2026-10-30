@@ -109,7 +109,7 @@ export function estimateQuote(input){
     methodology:custom?
       "Contractor-entered hours, hourly rate and material allowance; chosen complexity and urgency; contractor-entered overhead and markup. Low/high is a subjective -22%/+28% planning range, not statistical confidence.":
       "Illustrative labor and material allowances, coarse state multiplier, complexity and scheduling factors, plus 18% overhead and 12% cost-based profit markup. Low/high is a subjective planning range of -22%/+28%.",
-    disclaimer:"Planning estimate only. Not a binding bid, verified local market price, live wage index, or fair-market certification. No taxes, permits, specialty equipment, hidden conditions or site inspection. Validate before giving a customer a price."
+    disclaimer:"Planning estimate only. Not a bid or binding offer, verified local market price, live wage index, or fair-market certification. No taxes, permits, specialty equipment, hidden conditions or site inspection. Validate before giving a customer a price."
   };
 }
 const json = (data,status=200,headers={}) => new Response(JSON.stringify(data),{status,headers:{

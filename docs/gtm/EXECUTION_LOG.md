@@ -7,3 +7,5 @@
 - Implemented proposed PR: validated optional job-specific contractor rates and materials in API, local save/restore of pricebook, explicit disclosure between supplied and illustrative costs, tests of malformed pricing, corrected security document.
 - Implemented proposed PR: crawlable original markup/margin calculator, honest alternatives page, assisted setup disclosure with public GitHub inquiry, privacy, OG/canonical tags, robots/sitemap, tutorial landing.
 - No marketing distribution, real purchase, outreach send, account verification or paid conversion is claimed at audit time. CI/deployment outcomes appended only after checks finish.
+
+- PR #3 CI initially detected a wording mismatch in the baseline disclaimer test. The new custom pricing tests and syntax check passed; corrected wording to preserve tested disclaimer semantics. Added browser test suite and workflow for further verification. (Do not count as successful until the new workflow finishes.)
