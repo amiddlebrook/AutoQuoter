@@ -6,6 +6,17 @@
 
 > **Pricing honesty:** These are **illustrative planning estimates**, not verified fair-market prices, a certified bid, live BLS wage information, or a trained AI prediction. Confirm local prices, materials, permits, and site conditions before quoting a customer.
 
+## Go-to-market status (October 30, 2026)
+
+**Free contractor estimating utility, not an established paid SaaS.** [Try quote studio](https://autoquoter.averymiddlebrook2014.workers.dev/#studio) · [Live markup/margin calculator](https://autoquoter.averymiddlebrook2014.workers.dev/pricing-guide.html) · [Honest competitor comparison](https://autoquoter.averymiddlebrook2014.workers.dev/compare.html) · [Optional setup interest](https://autoquoter.averymiddlebrook2014.workers.dev/custom-setup.html) · [Video user guide](https://autoquoter.averymiddlebrook2014.workers.dev/demo.html).
+
+The GTM branch adds customer-entered per-service labor hours, hourly rate, material/unit allowance, overhead percentage and profit markup. Custom inputs are verified only against numeric bounds, **not against live vendor or market prices**. The original sample assumption mode remains available. The `/api/quote` calculation does not persist customer data; local browser pricebook settings are stored unencrypted and can be lost. Full walkthrough videos are generated using offline free tools, but publishing them is a separate CI gate.
+
+- No verified customers, revenue, subscriptions, checkout, merchant onboarding or order provisioning.
+- **No go** for undifferentiated paid estimating SaaS; validate the narrower free-tool + optional one-time setup hypothesis first.
+- Commercial operating documents: [product audit](docs/gtm/PRODUCT_AUDIT.md), [10 competitors](docs/gtm/COMPETITIVE_RESEARCH.md), [SEO](docs/gtm/SEO_STRATEGY.md), [financial model](docs/gtm/PRICING_AND_ECONOMICS.md), [launch gates](docs/gtm/LAUNCH_CHECKLIST.md), [execution log](docs/gtm/EXECUTION_LOG.md), [blockers](docs/gtm/BLOCKERS.md).
+- This release **does not** automatically invoice customers, collect deposits, send estimates, sync between devices or predict verified local rates.
+
 ## Status
 
 Version 2 repairs the original deployment architecture. The original GitHub repository contained a static-only Cloudflare Worker, while the HTML pages attempted to call a Flask server on `http://localhost:5000`. Its dashboard showed mock/random metrics and much of the “ML/integrations” functionality was not production-ready. **The current implementation is fully functional without Flask, Docker, Kubernetes, a purchased domain, database subscriptions, or API keys.**
@@ -14,7 +25,7 @@ Version 2 repairs the original deployment architecture. The original GitHub repo
 
 - **Interactive quote studio:** HVAC, plumbing, electrical, roofing, landscaping and remodeling; service presets; all 50 states plus Washington, DC; quantity, complexity, urgency and additional materials.
 - **Native API:** `GET /api/health`, `GET /api/catalog`, `POST /api/quote`.
-- **Explainable math:** labor, materials, overhead (18%) and profit allowance (12%), plus low/typical/high range.
+- **Explainable math:** illustrative defaults of 18% overhead and 12% cost-based markup, or verified user-entered percentages and job-specific labor/material inputs; low/typical/high is a subjective planning band.
 - **Saved estimates:** browser-local pipeline with draft/sent/accepted/declined status, search, filtering and duplication.
 - **Insights:** real totals and per-trade summaries calculated only from saved estimates—never pretend analytics.
 - **Exports:** print-to-PDF, copy summary, CSV, complete JSON backup and JSON restore.
@@ -73,7 +84,7 @@ The API validates request size, known job identifiers, states, quantity, timing,
   high = typical × 1.28
 ```
 
-Inputs, static hourly allowances, preset material allowances and state multipliers are visible in [src/worker.js](src/worker.js). These are **assumptions selected for prototyping**, not audited 2026 trade price data. The calculation deliberately does not invent provenance, confidence scores, ML models, or real-time external feed access.
+Illustrative inputs, static hourly allowances, preset material allowances and state multipliers are visible in [src/worker.js](src/worker.js). These are **assumptions selected for prototyping**, not audited 2026 trade price data. The calculation deliberately does not invent provenance, confidence scores, ML models, or real-time external feed access.
 
 ## Deploy with GitHub Actions
 
