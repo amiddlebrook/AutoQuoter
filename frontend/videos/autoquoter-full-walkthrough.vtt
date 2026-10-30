@@ -1,0 +1,172 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:01.672
+Welcome to AutoQuoter.
+
+00:00:01.672 --> 00:00:06.992
+This free contractor estimating worksheet covers six trade categories.
+
+00:00:06.992 --> 00:00:14.287
+It performs straightforward arithmetic, not artificial intelligence or real-time price research.
+
+00:00:14.287 --> 00:00:30.323
+In the tutorial you will learn how to select a job, calculate using example figures, switch to your own contractor-provided costs, save estimates locally, export data, and learn what the software does not offer.
+
+00:00:30.323 --> 00:00:35.566
+Every project and client label you see is invented for this tutorial.
+
+00:00:36.166 --> 00:00:40.073
+Start by selecting Quote Studio from the navigation.
+
+00:00:40.073 --> 00:00:43.980
+Choose a trade and one of its available job presets.
+
+00:00:43.980 --> 00:00:54.723
+The built-in catalogue is a planning starting point; material allowances and hourly rates are invented sample numbers, not a fair-market quote.
+
+00:00:54.723 --> 00:01:05.016
+All fifty states and Washington DC are selectable, but the state multipliers are also approximate rather than a real location price feed.
+
+00:01:05.616 --> 00:01:13.714
+In our demonstration, we select a heat-pump replacement, Colorado, quantity one and standard scheduling.
+
+00:01:13.714 --> 00:01:20.721
+We give the project an explicit sample name so that no real customer appears in the video.
+
+00:01:20.721 --> 00:01:31.622
+Calculate estimate shows a low, typical and high planning range, and a breakdown of labor, materials, overhead and cost-based profit markup.
+
+00:01:31.622 --> 00:01:36.995
+The range is subjective; it is not a statistical confidence interval.
+
+00:01:37.595 --> 00:01:42.429
+A serious estimate must use costs that an operator has verified.
+
+00:01:42.429 --> 00:01:47.037
+Enable the switch labeled Calculate using my rates and costs.
+
+00:01:47.037 --> 00:01:58.822
+Enter the assumed labor hours per unit, actual cost or billable rate per hour, the material allowance per unit, the overhead percent, and cost-based markup.
+
+00:01:58.822 --> 00:02:05.620
+When entering custom rates, the application does not add the broad state multiplier again.
+
+00:02:05.620 --> 00:02:09.020
+Complexity and scheduling still adjust labor.
+
+00:02:09.620 --> 00:02:23.120
+Our intentionally made-up example uses ten labor hours at one hundred dollars per hour, five hundred dollars in materials, twenty percent overhead and twenty-five percent markup.
+
+00:02:23.120 --> 00:02:37.303
+The resulting typical calculation is two thousand two hundred fifty dollars, composed of one thousand labor, five hundred materials, three hundred overhead, and four hundred fifty markup.
+
+00:02:37.303 --> 00:02:42.536
+Those are demonstration inputs only, not professional pricing advice.
+
+00:02:43.136 --> 00:02:49.151
+Save this job's rates to preserve the numbers in this browser for the selected service.
+
+00:02:49.151 --> 00:02:51.778
+Other job presets are not overwritten.
+
+00:02:51.778 --> 00:02:57.931
+These settings do not synchronize to another device, and they are not remotely backed up.
+
+00:02:57.931 --> 00:03:08.302
+The pricebook input values are transmitted to the calculation Worker only when you calculate, rather than persisted as user data in a server database.
+
+00:03:08.902 --> 00:03:13.221
+Once satisfied with the cost inputs, save the estimate.
+
+00:03:13.221 --> 00:03:18.324
+Add a reference title and a non-sensitive client label if useful.
+
+00:03:18.324 --> 00:03:25.627
+AutoQuoter keeps these labels in the browser; the calculation endpoint does not receive them.
+
+00:03:25.627 --> 00:03:33.401
+Never put credit-card details, secrets, or regulated client information into local browser storage.
+
+00:03:34.001 --> 00:03:45.255
+Open Estimates to search saved records, duplicate a quote, print a summary or change its local status from draft to sent, accepted or declined.
+
+00:03:45.255 --> 00:03:52.102
+A status you select yourself does not prove the customer signed, was invoiced, or paid.
+
+00:03:52.102 --> 00:03:57.375
+This is a planning pipeline, not a payment processor or shared CRM.
+
+00:03:57.975 --> 00:04:02.682
+The Insights page aggregates your own browser-saved estimates.
+
+00:04:02.682 --> 00:04:07.086
+When you mark a quote accepted, the total changes locally.
+
+00:04:07.086 --> 00:04:10.198
+This is not externally validated revenue.
+
+00:04:10.198 --> 00:04:19.841
+There are no fake lead counts, website visitors, earned payments or simulated historical customers in the production analytics.
+
+00:04:20.441 --> 00:04:27.926
+In Settings, export your estimates to CSV or download a JSON backup that can be restored later.
+
+00:04:27.926 --> 00:04:33.757
+Downloaded files remain with you; they are not copied to a vendor account.
+
+00:04:33.757 --> 00:04:36.830
+You can also clear saved local records.
+
+00:04:36.830 --> 00:04:44.394
+Printing relies on your browser's native print or Save as PDF function, not a cloud PDF service.
+
+00:04:44.994 --> 00:04:51.187
+AutoQuoter also includes a separate free contractor markup and margin calculator.
+
+00:04:51.187 --> 00:05:01.660
+Remember that a twenty percent cost-based markup creates a gross margin of approximately sixteen point seven percent, not twenty percent.
+
+00:05:01.660 --> 00:05:07.623
+There is an explanatory worked example and a direct link back to Quote Studio.
+
+00:05:07.623 --> 00:05:12.974
+Never assume an illustrative rate is a current local contractor quote.
+
+00:05:13.574 --> 00:05:21.627
+The public alternatives page points to Joist, Contractor Plus, Service M Eight, Jobber, and Housecall Pro.
+
+00:05:21.627 --> 00:05:30.517
+Those platforms offer features that AutoQuoter does not, such as billing, customer accounts, scheduling and payments.
+
+00:05:30.517 --> 00:05:35.987
+They may be better if your business needs a full field service platform.
+
+00:05:35.987 --> 00:05:43.964
+This transparent comparison helps choose the right tool instead of pretending AutoQuoter does everything.
+
+00:05:44.564 --> 00:05:48.967
+The free calculator remains available without a subscription.
+
+00:05:48.967 --> 00:05:56.834
+A separate page is testing interest in paid assistance configuring a pricebook using the buyer's own numbers.
+
+00:05:56.834 --> 00:06:05.495
+Pricing and fulfillment are not yet commercially validated, and the public inquiry link is not a secure customer portal.
+
+00:06:05.495 --> 00:06:11.630
+Do not submit customer identities, confidential costs or passwords in a public issue.
+
+00:06:12.230 --> 00:06:24.729
+To start, open the free quote studio, choose a trade and service, supply your real numbers if available, calculate, review the breakdown, and save or export.
+
+00:06:24.729 --> 00:06:31.655
+Verify materials, permits, taxes, scope and access before you present a customer price.
+
+00:06:31.655 --> 00:06:38.581
+This walkthrough demonstrates functional software with clearly fictional sample inputs.
+
+00:06:38.581 --> 00:06:42.641
+It does not claim customers, purchases or payments.
+
+00:06:42.641 --> 00:06:45.427
+Thank you for exploring AutoQuoter.

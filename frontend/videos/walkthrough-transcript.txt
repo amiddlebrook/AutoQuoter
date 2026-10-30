@@ -1,0 +1,41 @@
+SCENE 1 — Introduction
+Welcome to AutoQuoter. This free contractor estimating worksheet covers six trade categories. It performs straightforward arithmetic, not artificial intelligence or real-time price research. In the tutorial you will learn how to select a job, calculate using example figures, switch to your own contractor-provided costs, save estimates locally, export data, and learn what the software does not offer. Every project and client label you see is invented for this tutorial.
+
+SCENE 2 — Explore the studio
+Start by selecting Quote Studio from the navigation. Choose a trade and one of its available job presets. The built-in catalogue is a planning starting point; material allowances and hourly rates are invented sample numbers, not a fair-market quote. All fifty states and Washington DC are selectable, but the state multipliers are also approximate rather than a real location price feed.
+
+SCENE 3 — Illustrative quote
+In our demonstration, we select a heat-pump replacement, Colorado, quantity one and standard scheduling. We give the project an explicit sample name so that no real customer appears in the video. Calculate estimate shows a low, typical and high planning range, and a breakdown of labor, materials, overhead and cost-based profit markup. The range is subjective; it is not a statistical confidence interval.
+
+SCENE 4 — Use your own prices
+A serious estimate must use costs that an operator has verified. Enable the switch labeled Calculate using my rates and costs. Enter the assumed labor hours per unit, actual cost or billable rate per hour, the material allowance per unit, the overhead percent, and cost-based markup. When entering custom rates, the application does not add the broad state multiplier again. Complexity and scheduling still adjust labor.
+
+SCENE 5 — Calculate custom estimate
+Our intentionally made-up example uses ten labor hours at one hundred dollars per hour, five hundred dollars in materials, twenty percent overhead and twenty-five percent markup. The resulting typical calculation is two thousand two hundred fifty dollars, composed of one thousand labor, five hundred materials, three hundred overhead, and four hundred fifty markup. Those are demonstration inputs only, not professional pricing advice.
+
+SCENE 6 — Save job pricing
+Save this job's rates to preserve the numbers in this browser for the selected service. Other job presets are not overwritten. These settings do not synchronize to another device, and they are not remotely backed up. The pricebook input values are transmitted to the calculation Worker only when you calculate, rather than persisted as user data in a server database.
+
+SCENE 7 — Save a planning estimate
+Once satisfied with the cost inputs, save the estimate. Add a reference title and a non-sensitive client label if useful. AutoQuoter keeps these labels in the browser; the calculation endpoint does not receive them. Never put credit-card details, secrets, or regulated client information into local browser storage.
+
+SCENE 8 — Browse saved estimates
+Open Estimates to search saved records, duplicate a quote, print a summary or change its local status from draft to sent, accepted or declined. A status you select yourself does not prove the customer signed, was invoiced, or paid. This is a planning pipeline, not a payment processor or shared CRM.
+
+SCENE 9 — Insights without invented sales
+The Insights page aggregates your own browser-saved estimates. When you mark a quote accepted, the total changes locally. This is not externally validated revenue. There are no fake lead counts, website visitors, earned payments or simulated historical customers in the production analytics.
+
+SCENE 10 — Export and backup
+In Settings, export your estimates to CSV or download a JSON backup that can be restored later. Downloaded files remain with you; they are not copied to a vendor account. You can also clear saved local records. Printing relies on your browser's native print or Save as PDF function, not a cloud PDF service.
+
+SCENE 11 — Free pricing education
+AutoQuoter also includes a separate free contractor markup and margin calculator. Remember that a twenty percent cost-based markup creates a gross margin of approximately sixteen point seven percent, not twenty percent. There is an explanatory worked example and a direct link back to Quote Studio. Never assume an illustrative rate is a current local contractor quote.
+
+SCENE 12 — Compare alternatives
+The public alternatives page points to Joist, Contractor Plus, Service M Eight, Jobber, and Housecall Pro. Those platforms offer features that AutoQuoter does not, such as billing, customer accounts, scheduling and payments. They may be better if your business needs a full field service platform. This transparent comparison helps choose the right tool instead of pretending AutoQuoter does everything.
+
+SCENE 13 — Assisted setup proposition
+The free calculator remains available without a subscription. A separate page is testing interest in paid assistance configuring a pricebook using the buyer's own numbers. Pricing and fulfillment are not yet commercially validated, and the public inquiry link is not a secure customer portal. Do not submit customer identities, confidential costs or passwords in a public issue.
+
+SCENE 14 — Conclusion
+To start, open the free quote studio, choose a trade and service, supply your real numbers if available, calculate, review the breakdown, and save or export. Verify materials, permits, taxes, scope and access before you present a customer price. This walkthrough demonstrates functional software with clearly fictional sample inputs. It does not claim customers, purchases or payments. Thank you for exploring AutoQuoter.
