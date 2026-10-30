@@ -24,6 +24,7 @@ try{
   await page.reload({waitUntil:"networkidle"});
   assert.match(await page.locator("#estimatesBody").innerText(),/2,250/);
   await page.goto(base+"/#studio");
+  await page.locator("#task").selectOption("heatpump");
   assert.equal(await page.locator("#useCustomRates").isChecked(),true);
   assert.equal(await page.locator("#customRate").inputValue(),"100");
   await page.locator("#customRate").fill("");

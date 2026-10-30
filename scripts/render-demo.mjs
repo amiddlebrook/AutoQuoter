@@ -65,7 +65,7 @@ try{
    },text);
  }
  const actions=async i=>{
-   if(i===1){await page.goto(base+"/#studio");await page.locator("#tradeTabs button").first().waitFor();}
+   if(i===1){await page.goto(base+"/#studio");await page.locator("#tradeTabs button").first().waitFor();await page.locator("#task").selectOption("heatpump");}
    if(i===2){await page.locator("#projectName").fill("DEMO — sample heat pump job");await page.locator("#clientName").fill("Demo reference only");await page.locator("#calculateButton").click();await page.locator("#quoteMedian").innerText();}
    if(i===3){await page.locator("#useCustomRates").check();await page.locator("#customHours").fill("10");await page.locator("#customRate").fill("100");await page.locator("#customMaterials").fill("500");await page.locator("#customOverhead").fill("20");await page.locator("#customMarkup").fill("25");}
    if(i===4){await page.locator("#calculateButton").click();await page.locator("#quoteMedian").getByText("$2,250").waitFor();}
