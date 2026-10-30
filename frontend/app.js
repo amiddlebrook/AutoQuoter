@@ -1,3 +1,4 @@
+import {sanitizePricebook} from "./pricebook.js";
 const STORAGE_KEY="autoquoter-v2-estimates";
 const SETTINGS_KEY="autoquoter-v2-settings";
 const VALID_STATUS=["draft","sent","accepted","declined"];
@@ -268,8 +269,11 @@ function triggerDownload(name,content,type){
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 function exportJson(){
-  triggerDownload("autoquoter-backup-"+new Date().toISOString().slice(0,10)+".json",JSON.stringify({version:2,exportedAt:new Date().toISOString(),quotes},null,2),"application/json");
-  toast("JSON backup downloaded.");
+  try{
+    const pricebook=sanitizePricebook(settings.pricebook??{},catalog);
+    triggerDownload("autoquoter-backup-"+new Date().toISOString().slice(0,10)+".json",JSON.stringify({version:3,exportedAt:new Date().toISOString(),quotes,pricebook},null,2),"application/json");
+    toast("JSON backup downloaded with your saved job rates.");
+  }catch(error){toast("Backup failed: "+error.message);}
 }
 function csvCell(value){
   let s=String(value??"");
@@ -287,14 +291,21 @@ async function importJson(event){
   if(file.size>5_000_000){toast("Backup is too large (max 5 MB).");return;}
   try{
     const parsed=JSON.parse(await file.text());
-    if(parsed.version!==2||!Array.isArray(parsed.quotes))throw Error("Not a supported AutoQuoter backup");
+    if(![2,3].includes(parsed.version)||!Array.isArray(parsed.quotes))throw Error("Not a supported AutoQuoter backup");
     if(parsed.quotes.length>500)throw Error("A backup can contain at most 500 records");
     if(!parsed.quotes.every(validateRow))throw Error("The backup contains invalid records");
+    const importedPricebook=parsed.pricebook===undefined?null:sanitizePricebook(parsed.pricebook,catalog);
     const ids=new Set(quotes.map(q=>q.id));let added=0;
     for(const row of parsed.quotes){if(!ids.has(row.id)){quotes.push(row);ids.add(row.id);added++;}}
     quotes.sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt));
     if(quotes.length>500)quotes.length=500;
-    persist();renderAll();toast("Restored "+added+" new estimates.");
+    if(importedPricebook!==null){
+      const existing=sanitizePricebook(settings.pricebook??{},catalog);
+      settings.pricebook={...existing,...importedPricebook};
+      localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings));
+      loadSavedPricing();
+    }
+    persist();renderAll();toast("Restored "+added+" new estimates"+(importedPricebook!==null?" and "+Object.keys(importedPricebook).length+" job rate presets.":"."));
   }catch(error){toast("Import failed: "+error.message);}
 }
 function onTableClick(event){
