@@ -31,3 +31,23 @@ P3: add auth/D1/billing **only if** recurring software subscriptions show demand
 
 ## Test evidence
 Baseline last successful cloudflare workflow: https://github.com/amiddlebrook/AutoQuoter/actions/runs/38923678954 (Oct 16 2026). New PR's checks and deployment results must be added to `EXECUTION_LOG.md` when observed. README feature statements are not test results.
+
+
+## Commercial scorecard — qualitative judgment, not measured conversion probability
+
+Scored 0–10 as of 2026-10-30, based on first-party competitor pages and product inspection. No paid AutoQuoter sales or retention data exist.
+
+| Dimension | Score | Basis |
+|---|---:|---|
+| Demonstrated willingness to pay for AutoQuoter | 1/10 | Zero verified paying customers or signed offers |
+| Competitive differentiation | 3/10 | Account-free transparent math, but competitors offer more capabilities and free tiers |
+| Speed to first revenue | 3/10 | Proposed paid setup requires lead, merchant account, and delivery proof |
+| Cost/difficulty of acquisition | 3/10 | Search/content free of ad spend but uncertain and potentially slow |
+| Technical feasibility | 8/10 | Working deterministic core, browser QA and free deployment |
+| Operating margin | 5/10 | Low infrastructure cost, unknown human service labor and support |
+| Retention potential | 3/10 | Browser-local, no multi-user collaboration, uncertain repeat paid need |
+| Market accessibility at $0 upfront | 6/10 | Free Workers/site/search/community possible, but limited differentiation |
+| Long-term scalability | 4/10 | Free worksheet scales technically, one-off human setup does not |
+| **Overall risk-adjusted opportunity** | **3/10** | Paid SaaS no-go; narrow service validation only |
+
+**Decision:** NO-GO for another generic paid contractor estimating SaaS. PROCEED with a limited, fully free calculator as a demand-discovery asset, and one-time assisted pricebook setup only if real buyer evidence emerges. Do not conflate the high engineering completion score with business success.

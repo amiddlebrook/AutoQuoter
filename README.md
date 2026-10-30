@@ -115,6 +115,10 @@ A push to `master` after CI passes publishes the `autoquoter` Worker, generally 
 | `backend/`, `ml_components/`, `n8n_workflows/` | Preserved **legacy prototypes**, not used in v2 runtime |
 | `Dockerfile`, `k8s-deployment.yml` | Preserved legacy deployment files, not used |
 
+## Pricebook backup safety
+
+**Backup format v3** now exports saved estimates and contractor-entered per-service pricebook settings together. Import accepts older v2 quote-only exports as well as v3, validates known job identifiers and numeric limits, and merges pricebooks by job key. Because a restored job preset overwrites rates for the same job key, keep a second backup before importing. Never submit your saved JSON to a public GitHub issue.
+
 ## Security and limitations
 
 - Cross-origin API access is not enabled; application fetches use same-origin relative URLs.
