@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Sitemap: https://autoquoter.averymiddlebrook2014.workers.dev/sitemap.xml

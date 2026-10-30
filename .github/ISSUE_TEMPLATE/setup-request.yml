@@ -1,0 +1,37 @@
+name: Assisted pricebook setup inquiry (public)
+description: Share only non-sensitive information to discuss whether a custom job pricebook setup would fit.
+title: "[Pricebook inquiry] "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is a **public GitHub issue**. Do not enter customer identities, private supplier prices, credentials, contact information, or payment details. The feature and pricing are not a guaranteed service offer.
+  - type: input
+    id: trade
+    attributes:
+      label: Primary trade
+      placeholder: "e.g. electrical"
+    validations:
+      required: true
+  - type: textarea
+    id: jobs
+    attributes:
+      label: Job types you want configured
+      description: Describe jobs without private pricing details.
+    validations:
+      required: true
+  - type: textarea
+    id: pain
+    attributes:
+      label: Your current estimating workflow problem
+      description: What outcome would make setup worth paying for?
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Disclosure
+      options:
+        - label: I understand this is a public, nonbinding feasibility inquiry, not checkout or an order.
+          required: true
