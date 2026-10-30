@@ -22,6 +22,23 @@ test("quantity, location and complexity change prices",()=>{
   assert.ok(estimateQuote({...sample,complexity:"complex"}).median>baseline);
   assert.ok(estimateQuote({...sample,urgency:"emergency"}).median>baseline);
 });
+test("contractor-entered pricing uses exact user inputs without state multipliers",()=>{
+  const pricing={hoursPerUnit:10,laborRate:100,materialsPerUnit:500,overheadPercent:20,profitMarkupPercent:25};
+  const q=estimateQuote({...sample,pricing});
+  assert.equal(q.breakdown.hours,10);
+  assert.equal(q.breakdown.labor,1000);
+  assert.equal(q.breakdown.materials,500);
+  assert.equal(q.breakdown.overhead,300);
+  assert.equal(q.breakdown.margin,450);
+  assert.equal(q.median,2250);
+  assert.equal(q.pricingSource,"contractor-entered");
+  assert.equal(estimateQuote({...sample,state:"CA",pricing}).median,q.median);
+  assert.match(q.methodology,/Contractor-entered/);
+});
+test("invalid or incomplete custom pricing is rejected",()=>{
+ const valid={hoursPerUnit:10,laborRate:100,materialsPerUnit:500,overheadPercent:20,profitMarkupPercent:25};
+ for(const pricing of [null,[],{...valid,laborRate:"100"},{...valid,profitMarkupPercent:201},{...valid,materialsPerUnit:-1},{...valid,hoursPerUnit:0},{...valid,unknown:1},{laborRate:100}])assert.throws(()=>estimateQuote({...sample,pricing}),/./);
+});
 test("rejects invalid inputs",()=>{
   for(const invalid of [
     {...sample,trade:"not-a-trade"},{...sample,task:"__proto__"},

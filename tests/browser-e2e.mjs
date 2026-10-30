@@ -1,0 +1,47 @@
+import {chromium} from "playwright";
+import assert from "node:assert/strict";
+
+const base=process.env.BASE_URL || "http://127.0.0.1:8787";
+const browser=await chromium.launch({headless:true});
+try{
+  const page=await browser.newPage({viewport:{width:1280,height:900},acceptDownloads:true});
+  await page.goto(base+"/#studio",{waitUntil:"networkidle"});
+  await page.locator("#tradeTabs button").first().waitFor();
+  await page.locator("#task").selectOption("heatpump");
+  await page.locator("#useCustomRates").check();
+  await page.locator("#customHours").fill("10");
+  await page.locator("#customRate").fill("100");
+  await page.locator("#customMaterials").fill("500");
+  await page.locator("#customOverhead").fill("20");
+  await page.locator("#customMarkup").fill("25");
+  await page.locator("#savePricebook").click();
+  await page.locator("#calculateButton").click();
+  await page.locator("#quoteMedian").getByText("$2,250").waitFor();
+  assert.match(await page.locator("#pricingDisclosure").innerText(),/your entered job rates/);
+  await page.locator("#saveQuote").click();
+  await page.goto(base+"/#estimates");
+  assert.match(await page.locator("#estimatesBody").innerText(),/2,250/);
+  await page.reload({waitUntil:"networkidle"});
+  assert.match(await page.locator("#estimatesBody").innerText(),/2,250/);
+  await page.goto(base+"/#studio");
+  await page.locator("#task").selectOption("heatpump");
+  assert.equal(await page.locator("#useCustomRates").isChecked(),true);
+  assert.equal(await page.locator("#customRate").inputValue(),"100");
+  await page.locator("#customRate").fill("");
+  await page.locator("#calculateButton").click();
+  assert.match(await page.locator("#quoteError").innerText(),/laborRate/);
+  const dlPromise=page.waitForEvent("download");
+  await page.goto(base+"/#estimates");
+  await page.locator("#exportCsv").click();
+  const dl=await dlPromise;
+  assert.match(dl.suggestedFilename(),/\.csv$/);
+  await page.goto(base+"/pricing-guide.html");
+  await page.locator("#mkPrice").getByText("$3,653.28").waitFor();
+  await page.locator("#mkMarkup").fill("0");
+  await page.locator("#mkPrice").getByText("$3,044.40").waitFor();
+  await page.goto(base+"/custom-setup.html");
+  assert.match(await page.title(),/Custom Contractor/);
+  await page.goto(base+"/sitemap.xml");
+  assert.match(await page.locator("body").innerText(),/pricing-guide.html/);
+  console.log("BROWSER_E2E_OK: custom pricing, saved pricebook, calculate, invalid input, persistence, CSV, pricing calculator, SEO pages");
+}finally{await browser.close();}
