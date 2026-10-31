@@ -26,3 +26,12 @@ Status is evidence-based; checked boxes mean work actually landed and was verifi
 - Narrated video render, audio/captions, live Cloudflare redeploy (passed): https://github.com/amiddlebrook/AutoQuoter/actions/runs/41144364331
 - Pricebook backup/restore E2E (passed): https://github.com/amiddlebrook/AutoQuoter/actions/runs/41144633875
 - Public feedback post: https://github.com/amiddlebrook/AutoQuoter/issues/4
+
+## Added GTM proof (2026-10-30)
+- [x] Private, unverified inquiry software built on Cloudflare free storage, 90-day cleanup and consent controls; PR #6.
+- [x] Intake fails closed without a configured admin secret; PR #7.
+- [x] Live Worker production deploy and lead-status smoke tests passed: https://github.com/amiddlebrook/AutoQuoter/actions/runs/41152970587.
+- [x] IndexNow URL change notification was received with HTTP 202, **not** indexing: same run.
+- [ ] Cloudflare owner configures `LEADS_ADMIN_TOKEN`, checks private lead review and confirms real visitor submission path is usable.
+- [ ] Search Console/Bing Webmaster ownership verified and actual search impressions measured.
+- [ ] Any qualified real customer conversations, offers, purchases or revenue (none verified).

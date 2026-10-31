@@ -134,3 +134,7 @@ A push to `master` after CI passes publishes the `autoquoter` Worker, generally 
 Make changes in a branch, run `npm test && npm run check`, submit a pull request, and merge after checks pass. No build step is required.
 
 [Cloudflare Workers documentation](https://developers.cloudflare.com/workers/) · [Cloudflare GitHub Actions deployment](https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/) · [Report an issue](https://github.com/amiddlebrook/AutoQuoter/issues)
+
+## Owner-only lead review activation
+
+The free private setup inquiry is deliberately **closed until a secret is configured**; this prevents collecting personal details without a working review path. In the Cloudflare dashboard open **Workers & Pages → autoquoter → Settings → Variables and Secrets**, create an encrypted Worker secret named `LEADS_ADMIN_TOKEN` with a random **24+ character** value, and deploy the secret change. The request form on `/custom-setup.html` then becomes active, and the owner can review unverified inquiries at `/lead-admin.html`. Never put the secret into this repository or an email campaign; the admin page holds it only in memory. No automatic inbox notifications exist. No quote data is saved in this inquiry inbox.
