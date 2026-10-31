@@ -5,7 +5,7 @@ const SKIP=new Set(["lead-admin.html","lead-delete.html","analytics.html","dashb
 export function changedPublicPages(changed){
  const out=new Set();
  for(const p of changed){
-  if(p==="frontend/index.html")out.add(BASE+"/");
+  if(p==="frontend/index.html"){out.add(BASE+"/");continue;}
   if(p.startsWith("frontend/")&&p.endsWith(".html")){
    const leaf=p.slice("frontend/".length);
    if(!SKIP.has(leaf))out.add(BASE+"/"+leaf);
