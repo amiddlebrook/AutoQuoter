@@ -62,5 +62,23 @@ try{
   assert.match(await page.title(),/Custom Contractor/);
   await page.goto(base+"/sitemap.xml");
   assert.match(await page.locator("body").innerText(),/pricing-guide.html/);
-  console.log("BROWSER_E2E_OK: custom pricing, saved pricebook, calculate, invalid input, persistence, CSV, pricing calculator, SEO pages");
+
+  // Real Cloudflare local Durable Object test: private lead intake and self-deletion.
+  await page.goto(base+"/custom-setup.html");
+  await page.locator("#leadEmail").fill("demo-buyer@example.org");
+  await page.locator("#leadProblem").fill("I would like a faster way to configure five common job pricebooks using my own labor and material costs.");
+  await page.locator("#leadBudget").selectOption("200to500");
+  await page.locator("#leadConsent").check();
+  await page.locator("#leadSubmit").click();
+  await page.locator("#leadReceipt").waitFor({state:"visible"});
+  const reference=await page.locator("#leadReference").textContent();
+  assert.match(reference,/^[a-f0-9-]{36}:[a-f0-9]{32}$/);
+  await page.goto(base+"/lead-delete.html");
+  await page.locator("#deleteRef").fill(reference);
+  await page.locator("#deleteForm button").click();
+  await page.locator("#deleteStatus").getByText(/processed/).waitFor();
+  const notAdmin=await page.request.get(base+"/api/leads/admin");
+  assert.equal(notAdmin.status(),503);
+
+  console.log("BROWSER_E2E_OK: custom pricing, saved pricebook, calculate, invalid input, persistence, CSV, pricing calculator, SEO pages, private inquiry and deletion");
 }finally{await browser.close();}

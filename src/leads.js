@@ -102,7 +102,8 @@ export async function leadRequest(request,env,url){
     if(fields.spam)return json({ok:true,received:true});
     const ip=request.headers.get("cf-connecting-ip")||"unknown",day=new Date().toISOString().slice(0,10);
     const ipHash=hex(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(day+"|"+ip+"|"+url.hostname)));
-    body={fields:{...fields,website:"",consent:true},ipHash};
+    const {spam,...safeFields}=fields;
+    body={fields:{...safeFields,website:"",consent:true},ipHash};
   }
   const stub=env.LEADS.get(env.LEADS.idFromName("autoquoter-inquiry-inbox-v1"));
   return stub.fetch(new Request("https://internal"+operation,{method:operation==="/admin-list"?"GET":"POST",headers:{"content-type":"application/json"},body:operation==="/admin-list"?undefined:JSON.stringify(body)}));
