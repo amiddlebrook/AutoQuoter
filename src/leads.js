@@ -82,7 +82,9 @@ export class LeadsInbox{
 export async function leadRequest(request,env,url){
   if(!env?.LEADS)return json({error:"Inquiry storage unavailable. Use the GitHub support link."},503);
   const method=request.method,path=url.pathname;
-  if(path==="/api/leads/status"&&method==="GET")return json({accepting:true,kind:"unverified-inquiries",contact:"manual-review",retentionDays:LEAD_TTL_DAYS});
+  const ready=typeof env.LEADS_ADMIN_TOKEN==="string"&&env.LEADS_ADMIN_TOKEN.length>=24;
+  if(path==="/api/leads/status"&&method==="GET")return json({accepting:ready,kind:"unverified-inquiries",contact:"manual-review",retentionDays:LEAD_TTL_DAYS});
+  if(path==="/api/leads"&&!ready)return json({error:"Private intake is not enabled. Use the public GitHub inquiry instead."},503);
   const adminList=path==="/api/leads/admin",adminDelete=path==="/api/leads/admin/delete",selfDelete=path==="/api/leads/delete";
   if(adminList||adminDelete){
     const token=env.LEADS_ADMIN_TOKEN;

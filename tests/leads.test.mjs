@@ -26,3 +26,11 @@ test("cross-origin and non-json submissions rejected before storage",async()=>{
  const text=await worker.fetch(req("/api/leads",{method:"POST",headers:{"content-type":"text/plain"},body:"bad"}),env);
  assert.equal(text.status,415);
 });
+
+test("never accepts inaccessible PII when admin secret not configured",async()=>{
+ const stub={get(){throw Error("must never write unreachable leads")},idFromName(){throw Error("must never write unreachable leads")}};
+ const response=await worker.fetch(req("/api/leads",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(valid)}),{LEADS:stub});
+ assert.equal(response.status,503);
+ const state=await worker.fetch(req("/api/leads/status"),{LEADS:stub});
+ assert.equal((await state.json()).accepting,false);
+});

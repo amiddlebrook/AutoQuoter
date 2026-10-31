@@ -78,7 +78,7 @@ try{
   await page.locator("#deleteForm button").click();
   await page.locator("#deleteStatus").getByText(/processed/).waitFor();
   const notAdmin=await page.request.get(base+"/api/leads/admin");
-  assert.equal(notAdmin.status(),503);
+  assert.equal(notAdmin.status(),403);
 
   console.log("BROWSER_E2E_OK: custom pricing, saved pricebook, calculate, invalid input, persistence, CSV, pricing calculator, SEO pages, private inquiry and deletion");
 }finally{await browser.close();}

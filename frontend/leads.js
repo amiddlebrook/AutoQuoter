@@ -47,3 +47,11 @@ if(admin)admin.addEventListener("submit",async event=>{
   }
  }catch(e){$("adminStatus").textContent=e.message;}
 });
+
+if(form)fetch("/api/leads/status").then(r=>r.json()).then(s=>{
+ if(s.accepting){form.hidden=false;$("leadMessage").textContent="";}else{
+  form.hidden=true;$("leadMessage").textContent="Private intake is not yet enabled. You can still submit a non-sensitive public GitHub inquiry using the link below.";
+ }
+}).catch(()=>{
+ form.hidden=true;$("leadMessage").textContent="Private inquiry availability could not be checked. Try the public GitHub alternative.";
+});
