@@ -17,3 +17,7 @@
 
 ## Next most valuable action
 Test end-to-end contractor input price math and browser persistence; then get independent proof from a real user willing to compare self-service vs paid setup before building any SaaS payments.
+
+## Owner-only inquiry review secret
+- New free Cloudflare Durable Object stores first-party, unverified feasibility inquiries, with no email notification. Set Cloudflare Worker secret `LEADS_ADMIN_TOKEN` to a random >=24-character value (via Cloudflare dashboard). Only then can the operator access `/lead-admin.html`. Never commit tokens or put them in browser localStorage.
+- No verified submissions, sales or replies are implied by deploying this intake; manual lead review is required. No email blasts or paid campaigns.
