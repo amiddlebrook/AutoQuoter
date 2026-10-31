@@ -45,6 +45,7 @@ export class LeadsInbox{
         const hash=hex(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(id+":"+code)));
         this.sql.exec("INSERT INTO inquiries(id,created_at,company,email,problem,jobs,budget,source,ip_day_hash,delete_hash) VALUES(?,?,?,?,?,?,?,?,?,?)",
           id,now,lead.company,lead.email,lead.problem,lead.jobs,lead.budget,lead.source,input.ipHash,hash);
+        await this.state.storage.setAlarm(now+DAY);
         return json({ok:true,id,deleteCode:code,message:"Received for review. This is not a paid order."},201);
       }
       if(path==="/admin-list"&&request.method==="GET"){
@@ -71,6 +72,12 @@ export class LeadsInbox{
       return json({error:"Unable to process inquiry"},503);
     }
   }
+  async alarm(){
+    const threshold=Date.now()-LEAD_TTL_DAYS*DAY;
+    this.sql.exec("DELETE FROM inquiries WHERE created_at < ?",threshold);
+    const n=this.sql.exec("SELECT count(*) as total FROM inquiries").one().total;
+    if(n>0)await this.state.storage.setAlarm(Date.now()+DAY);
+  }
 }
 export async function leadRequest(request,env,url){
   if(!env?.LEADS)return json({error:"Inquiry storage unavailable. Use the GitHub support link."},503);
@@ -81,6 +88,7 @@ export async function leadRequest(request,env,url){
     const token=env.LEADS_ADMIN_TOKEN;
     if(typeof token!=="string"||token.length<24)return json({error:"Admin access is not configured"},503);
     const provided=request.headers.get("authorization")||"",expected="Bearer "+token;
+    if(provided.length>256)return json({error:"Forbidden"},403);
     let different=provided.length^expected.length;
     for(let i=0;i<Math.max(provided.length,expected.length);i++)different|=(provided.charCodeAt(i)||0)^(expected.charCodeAt(i)||0);
     if(different!==0)return json({error:"Forbidden"},403);
