@@ -20,7 +20,7 @@ test("requires admin secret even when lead storage is bound",async()=>{
  assert.equal(r.status,503);
 });
 test("cross-origin and non-json submissions rejected before storage",async()=>{
- const env={LEADS:{get(){throw Error("must not be called")},idFromName(){throw Error("must not be called")}}};
+ const env={LEADS:{get(){throw Error("must not be called")},idFromName(){throw Error("must not be called")}},LEADS_ADMIN_TOKEN:"integration-test-only-0123456789"};
  const alien=await worker.fetch(req("/api/leads",{method:"POST",headers:{"origin":"https://attacker.example","content-type":"application/json"},body:JSON.stringify(valid)}),env);
  assert.equal(alien.status,403);
  const text=await worker.fetch(req("/api/leads",{method:"POST",headers:{"content-type":"text/plain"},body:"bad"}),env);
