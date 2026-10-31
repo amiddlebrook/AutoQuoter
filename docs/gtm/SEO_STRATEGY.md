@@ -25,3 +25,6 @@ Avoid broad 'best contractor estimating software' keyword until actual experienc
 - Add new pages only in response to measured query impressions/customer questions. No mass-produced thin pages.
 
 No search ranking, referral traffic, or Google impression count has been observed.
+
+## Actual IndexNow search discovery
+An IndexNow ownership text file is hosted in frontend; after successful production deployment, a no-cost action verifies the key and only submits modified indexable HTML pages (not admin/private pages) to api.indexnow.org. HTTP 200/202 means accepted for *processing*, **not** indexing or ranking. Any failure is logged, without failing deployment. Google Search Console and Bing Webmaster ownership are not yet verified. See https://www.bing.com/indexnow/getstarted.

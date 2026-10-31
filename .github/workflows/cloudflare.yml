@@ -36,6 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -60,4 +62,10 @@ jobs:
           grep -q 'Quote studio' /tmp/autoquoter-index.html
           curl -fsSL --retry 3 --retry-all-errors --retry-delay 2 "$BASE_URL/app.js" -o /tmp/autoquoter-app.js
           grep -q 'function renderResult' /tmp/autoquoter-app.js
-          echo "Live Cloudflare endpoints and frontend passed smoke checks."
+          curl -fsSL "$BASE_URL/api/leads/status" | jq -e '.accepting == true and .kind == "unverified-inquiries"'
+          curl -fsSL "$BASE_URL/custom-setup.html" | grep -q 'id="leadForm"'
+          curl -fsSL "$BASE_URL/8a9bd2047bb730e4c2bc84eef226635e.txt" | grep -Fxq '8a9bd2047bb730e4c2bc84eef226635e'
+          echo "Live quote, private lead intake and SEO ownership key passed smoke checks."
+      - name: Notify IndexNow of changed pages (no fee)
+        continue-on-error: true
+        run: node scripts/indexnow-submit.mjs
