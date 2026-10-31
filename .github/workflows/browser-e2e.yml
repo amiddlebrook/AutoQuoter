@@ -21,7 +21,7 @@ jobs:
       - name: Launch local Cloudflare Worker and test actual browser workflows
         run: |
           set -euo pipefail
-          npx wrangler@4 dev --ip 127.0.0.1 --port 8787 > /tmp/autoquoter-dev.log 2>&1 &
+          npx wrangler@4 dev --ip 127.0.0.1 --port 8787 --var LEADS_ADMIN_TOKEN:integration-test-only-0123456789 > /tmp/autoquoter-dev.log 2>&1 &
           for i in $(seq 1 40); do
             if curl -fsS http://127.0.0.1:8787/api/health > /dev/null; then break; fi
             sleep 1
