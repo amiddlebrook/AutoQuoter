@@ -6,7 +6,7 @@
   "description": "Zero-cost Cloudflare-native contractor quote workspace",
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check src/worker.js && node --check frontend/app.js",
+    "check": "node --check src/worker.js && node --check src/leads.js && node --check frontend/app.js && node --check frontend/leads.js",
     "dev": "npx wrangler@4 dev",
     "deploy": "npx wrangler@4 deploy",
     "build": "npm run check"

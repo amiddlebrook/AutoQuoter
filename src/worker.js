@@ -1,3 +1,5 @@
+import {leadRequest} from "./leads.js";
+export {LeadsInbox} from "./leads.js";
 export const STATE_INDEX = Object.freeze({
 AL:0.87,AK:1.30,AZ:1.02,AR:0.86,CA:1.32,CO:1.10,CT:1.23,DE:1.06,DC:1.28,FL:0.98,GA:0.95,HI:1.44,ID:0.97,IL:1.12,IN:0.95,IA:0.92,KS:0.90,KY:0.90,LA:0.92,ME:1.08,MD:1.19,MA:1.29,MI:1.00,MN:1.14,MS:0.84,MO:0.94,MT:1.01,NE:0.92,NV:1.13,NH:1.13,NJ:1.28,NM:0.92,NY:1.30,NC:0.93,ND:0.99,OH:0.96,OK:0.88,OR:1.16,PA:1.06,RI:1.17,SC:0.90,SD:0.90,TN:0.92,TX:0.99,UT:1.03,VT:1.10,VA:1.10,WA:1.22,WV:0.85,WI:1.01,WY:1.02
 });
@@ -131,6 +133,7 @@ export default {
       if(url.pathname.startsWith("/api/")){
         if(request.method==="GET" && url.pathname==="/api/health")return json({status:"ok",engine:"cloudflare-worker",dataSource:"illustrative or contractor-entered inputs; no verified market pricing"});
         if(request.method==="GET" && url.pathname==="/api/catalog")return json({catalog:CATALOG,states:Object.keys(STATE_INDEX).sort()});
+        if(url.pathname.startsWith("/api/leads"))return leadRequest(request,env,url);
         if(url.pathname==="/api/quote"){
           if(request.method!=="POST")return json({error:"Method not allowed"},405,{allow:"POST"});
           if(!request.headers.get("content-type")?.toLowerCase().startsWith("application/json"))return json({error:"Expected application/json"},415);

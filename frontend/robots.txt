@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /api/
+Disallow: /lead-admin.html
+Disallow: /lead-delete.html
 Sitemap: https://autoquoter.averymiddlebrook2014.workers.dev/sitemap.xml
