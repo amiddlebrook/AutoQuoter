@@ -7,3 +7,11 @@ workers_dev = true
 directory = "./frontend"
 binding = "ASSETS"
 run_worker_first = true
+
+[[durable_objects.bindings]]
+name = "LEADS"
+class_name = "LeadsInbox"
+
+[exports.LeadsInbox]
+type = "durable-object"
+storage = "sqlite"
